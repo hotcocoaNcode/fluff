@@ -1,0 +1,22 @@
+println "Hello World!";
+/* println "Comment should not execute"; */
+string a = "";
+input a;
+int i = 0;
+loop {
+    i = i + 1;
+    println i;
+    if a == "a" {
+        if i > 5 {
+                println "i is more than 5";
+        }
+        int i2 = 0;
+        loop {
+            i2 = i2 + 1;
+            println "hooray!";
+            lif i2 < 3;
+        }
+    }
+    lif i < 10;
+}
+exit 0;
