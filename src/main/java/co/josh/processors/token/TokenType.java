@@ -51,7 +51,8 @@ public enum TokenType {
     define_type("define_type"),
     macro_def("define_macro"),
     semi(";"),
-    quick_assign("quick_assign");
+    quick_assign("quick_assign"),
+    memfree("free_memory");
 
     public String s;
     TokenType(String s) {

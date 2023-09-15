@@ -1,5 +1,6 @@
-int a .> 10;
-int b .> 5;
-int c .> 0;
-/*c = a + b;*/
+short a .> 10;
+byte b = -5;
+short c = a + b;
+free b;
+byte d = 127;
 exit 0;

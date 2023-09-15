@@ -14,15 +14,15 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
     public v2Tokenizer(){
         //Types
         keywords.put("byte", TokenType.byte_var);
-        keywords.put("int", TokenType.int_var);
-        keywords.put("boolean", TokenType.boolean_var);
-        keywords.put("float16", TokenType.float_var);
+        keywords.put("short", TokenType.int_var);
+        keywords.put("f16", TokenType.float_var);
         //Functions
         keywords.put("println", TokenType.println);
         keywords.put("print", TokenType.print);
         keywords.put("exit", TokenType.exit);
-        keywords.put("input", TokenType.input);
+        keywords.put("charin", TokenType.input);
         keywords.put("include", TokenType.include);
+        keywords.put("free", TokenType.memfree);
         //Conditionals
         keywords.put("if", TokenType._if);
         keywords.put("lif", TokenType.loopback_if);
@@ -69,7 +69,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                         t.add(new Token(TokenType.name, buf));
                     }
                     buf = "";
-                } else if (Character.isDigit(s.charAt(i))) {
+                } else if (Character.isDigit(s.charAt(i)) || (s.charAt(i) == '-' && Character.isDigit(s.charAt(i+1)))) {
                     buf = buf + s.charAt(i);
                     boolean isInt = true;
                     i++;
@@ -85,7 +85,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     }
                     i--;
                     if (isInt) {
-                        t.add(new Token(TokenType.int_val, Integer.valueOf(buf)));
+                        t.add(new Token(TokenType.int_val, Short.valueOf(buf)));
                     } else {
                         t.add(new Token(TokenType.float_val, Float.valueOf(buf)));
                     }
