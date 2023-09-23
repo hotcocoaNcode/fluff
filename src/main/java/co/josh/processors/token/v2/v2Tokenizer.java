@@ -3,7 +3,6 @@ package co.josh.processors.token.v2;
 import co.josh.JoshLogger;
 import co.josh.processors.token.Token;
 import co.josh.processors.token.TokenType;
-import co.josh.processors.token.Tokenizer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,14 +14,14 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
         //Types
         keywords.put("byte", TokenType.byte_var);
         keywords.put("short", TokenType.int_var);
-        keywords.put("f16", TokenType.float_var);
         //Functions
-        keywords.put("println", TokenType.println);
-        keywords.put("print", TokenType.print);
+        keywords.put("cout", TokenType.raw_out);
         keywords.put("exit", TokenType.exit);
-        keywords.put("charin", TokenType.input);
+        keywords.put("cin", TokenType.input);
         keywords.put("include", TokenType.include);
         keywords.put("free", TokenType.memfree);
+        keywords.put("csalloc", TokenType.static_scoped_allocate);
+        keywords.put("cgalloc", TokenType.static_global_allocate);
         //Conditionals
         keywords.put("if", TokenType._if);
         keywords.put("lif", TokenType.loopback_if);
@@ -45,6 +44,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
             if (s.charAt(i) == '*' && s.charAt(i+1) == '/'){
                 inComment = false;
                 i += 2;
+                continue;
             }
             if (!inComment) {
                 //keywords
@@ -62,9 +62,9 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     if (keywords.containsKey(buf)) {
                         t.add(new Token(keywords.get(buf), null));
                     } else if (buf.equals("true")) {
-                        t.add(new Token(TokenType.boolean_val, true));
+                        t.add(new Token(TokenType.int_literal, 1));
                     } else if (buf.equals("false")) {
-                        t.add(new Token(TokenType.boolean_val, false));
+                        t.add(new Token(TokenType.int_literal, -1));
                     } else {
                         t.add(new Token(TokenType.name, buf));
                     }
@@ -85,7 +85,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     }
                     i--;
                     if (isInt) {
-                        t.add(new Token(TokenType.int_val, Short.valueOf(buf)));
+                        t.add(new Token(TokenType.int_literal, Short.valueOf(buf)));
                     } else {
                         t.add(new Token(TokenType.float_val, Float.valueOf(buf)));
                     }
@@ -105,6 +105,11 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 } else if (s.charAt(i) == ']') {
                     t.add(new Token(TokenType.bracket_close, null));
                 }
+                //Have to slap this before booleans (nequals)
+                else if (s.charAt(i) == '!' && s.charAt(i+1) == '=') {
+                    t.add(new Token(TokenType.inequality_not_equals, null));
+                    i++;
+                }
                 //Booleans
                 else if (s.charAt(i) == '&' && s.charAt(i + 1) == '&') {
                     t.add(new Token(TokenType.and_bool_op, null));
@@ -120,6 +125,24 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 //AssignNoEval
                 else if (s.charAt(i) == '.' && s.charAt(i + 1) == '>') {
                     t.add(new Token(TokenType.quick_assign, null));
+                    i++;
+                }
+                //Slapping in bit shifts here so inequalities don't override them
+                else if (s.charAt(i) == '<' && s.charAt(i+1) == '<'){
+                    t.add(new Token(TokenType.bit_shift_left, null));
+                    i++;
+                } else if (s.charAt(i) == '>' && s.charAt(i+1) == '>'){
+                    t.add(new Token(TokenType.bit_shift_right, null));
+                    i++;
+                }
+                //Pointer syntax
+                else if (s.charAt(i) == '@'){
+                    t.add(new Token(TokenType.get_pointer, null));
+                } else if (s.charAt(i) == '<' && s.charAt(i+1) == '-'){
+                    t.add(new Token(TokenType.set_val_at_pointer, null));
+                    i++;
+                } else if (s.charAt(i) == '-' && s.charAt(i+1) == '>'){
+                    t.add(new Token(TokenType.get_val_at_pointer, null));
                     i++;
                 }
                 //Inequalities
@@ -142,6 +165,9 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     t.add(new Token(TokenType.multiply, null));
                 } else if (s.charAt(i) == '/') {
                     t.add(new Token(TokenType.divide, null));
+                } else if (s.charAt(i) == '%' && s.charAt(i+1) == '%'){
+                    t.add(new Token(TokenType.modulo, null));
+                    i++;
                 }
                 //Other random syntax things that may or may not be used (individually documented)
                 else if (s.charAt(i) == '"') {
@@ -160,7 +186,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     //char val
                     i++;
                     if (s.charAt(i + 1) == '\'') {
-                        t.add(new Token(TokenType.char_val, s.charAt(i)));
+                        t.add(new Token(TokenType.int_literal, (byte)s.charAt(i)));
                     } else {
                         JoshLogger.syntaxError("Character can only be one char in length!");
                     }

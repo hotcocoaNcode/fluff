@@ -1,4 +1,4 @@
-package co.josh.processors.expression.liveEval;
+package co.josh.processors.expression.eval;
 
 import co.josh.processors.token.Token;
 import co.josh.processors.token.TokenType;

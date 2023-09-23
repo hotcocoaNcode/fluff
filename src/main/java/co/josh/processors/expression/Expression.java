@@ -1,7 +1,7 @@
 package co.josh.processors.expression;
 
-import co.josh.processors.expression.liveEval.InequalityEvaluator;
-import co.josh.processors.expression.liveEval.RPN;
+import co.josh.processors.expression.eval.InequalityEvaluator;
+import co.josh.processors.expression.eval.RPN;
 import co.josh.processors.expression.shuntingyard.BooleanShuntingYard;
 import co.josh.processors.expression.shuntingyard.NumericalShuntingYard;
 import co.josh.processors.token.Token;

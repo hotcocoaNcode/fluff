@@ -1,0 +1,4 @@
+short x .> 5;
+short y .> 48;
+cout x + y;
+exit 0;

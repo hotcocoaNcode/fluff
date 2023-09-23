@@ -1,6 +1,5 @@
-short a .> 10;
-byte b = -5;
-short c = a + b;
-free b;
-byte d = 127;
-exit 0;
+/*Prepare array*/
+short start .> 0;
+cgalloc 1024 start;
+short accessPointer = start;
+short arrayLength .> 1024;

@@ -43,7 +43,7 @@ public class Interpreter {
                     if (variableData instanceof String){
                         out.add(new Token(TokenType.string_val, variableData));
                     } else if (variableData instanceof Integer){
-                        out.add(new Token(TokenType.int_val, variableData));
+                        out.add(new Token(TokenType.int_literal, variableData));
                     } else if (variableData instanceof Boolean) {
                         out.add(new Token(TokenType.boolean_val, variableData));
                     }
@@ -99,7 +99,7 @@ public class Interpreter {
                     //Is Exit
                     else if (tokens.get(i).getTokenType() == TokenType.exit){
                         i++;
-                        if (tokens.get(i).getTokenType() == TokenType.int_val){
+                        if (tokens.get(i).getTokenType() == TokenType.int_literal){
                             System.out.println("Program exited with code " + (int)tokens.get(i).getValue());
                             break;
                         } else if (tokens.get(i).getTokenType() == TokenType.name){
@@ -203,7 +203,7 @@ public class Interpreter {
                     else if (tokens.get(i).getTokenType() == TokenType.print){
                         i++;
                         if (tokens.get(i).getTokenType() == TokenType.string_val
-                                || tokens.get(i).getTokenType() == TokenType.int_val
+                                || tokens.get(i).getTokenType() == TokenType.int_literal
                                 || tokens.get(i).getTokenType() == TokenType.float_val
                                 || tokens.get(i).getTokenType() == TokenType.boolean_val){
                             System.out.print(tokens.get(i).getValue());
@@ -224,7 +224,7 @@ public class Interpreter {
                     else if (tokens.get(i).getTokenType() == TokenType.println){
                         i++;
                         if (tokens.get(i).getTokenType() == TokenType.string_val
-                                || tokens.get(i).getTokenType() == TokenType.int_val
+                                || tokens.get(i).getTokenType() == TokenType.int_literal
                                 || tokens.get(i).getTokenType() == TokenType.float_val
                                 || tokens.get(i).getTokenType() == TokenType.boolean_val){
                             System.out.println(tokens.get(i).getValue());

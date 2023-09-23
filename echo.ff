@@ -1,0 +1,27 @@
+byte in = ' ';
+short ptr = 0;
+cgalloc 100 ptr;
+short start = ptr;
+byte atptr = ' ';
+loop {
+    cin in;
+    ptr <- in;
+    ptr = ptr + 1;
+} lif (in != '\') && (ptr < start+100);
+/*terminate string*/
+ptr = ptr - 1;
+in = 0;
+ptr <- in;
+free in;
+/*reset pointer*/
+ptr = start;
+loop {
+   /*print out string*/
+   byte a .> 0;
+   ptr -> a;
+   cout a;
+   ptr = ptr + 1;
+   ptr -> atptr;
+} lif (atptr != 0);
+
+exit 0;

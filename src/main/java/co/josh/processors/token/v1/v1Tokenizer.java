@@ -86,7 +86,7 @@ public class v1Tokenizer implements Tokenizer {
                     }
                     i--;
                     if (isInt) {
-                        t.add(new Token(TokenType.int_val, Integer.valueOf(buf)));
+                        t.add(new Token(TokenType.int_literal, Integer.valueOf(buf)));
                     } else if (decimalCount < 7) {
                         t.add(new Token(TokenType.float_val, Float.valueOf(buf)));
                     } else {

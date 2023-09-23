@@ -6,40 +6,60 @@ import co.josh.processors.token.TokenType;
 import java.util.ArrayList;
 import java.util.Stack;
 
-public class NumericalShuntingYard {
+public class CompilerShuntingYard {
     // Method is used to get the precedence of operators
     private static boolean isNotOperator(Token t)
     {
-        return t.getTokenType() == TokenType.int_literal || t.getTokenType() == TokenType.float_val || t.getTokenType() == TokenType.name;
+        return t.getTokenType() == TokenType.int_literal || t.getTokenType() == TokenType.name;
     }
 
     // Operator having higher precedence
     // value will be returned
     static int getPrecedence(Token t)
     {
-
-        if (t.getTokenType() == TokenType.add  || t.getTokenType() == TokenType.subtract)
+        if (t.getTokenType() == TokenType.inequality_greater
+                || t.getTokenType() == TokenType.inequality_equals
+                || t.getTokenType() == TokenType.inequality_lesser
+                || t.getTokenType() == TokenType.inequality_not_equals
+                || t.getTokenType() == TokenType.not_bool_op
+                || t.getTokenType() == TokenType.or_bool_op
+                || t.getTokenType() == TokenType.and_bool_op
+                || t.getTokenType() == TokenType.xor_bool_op)
             return 1;
-        else if (t.getTokenType() == TokenType.multiply  || t.getTokenType() == TokenType.divide)
+        else if (t.getTokenType() == TokenType.bit_shift_right
+                || t.getTokenType() == TokenType.bit_shift_left)
             return 2;
+        else if (t.getTokenType() == TokenType.add
+                || t.getTokenType() == TokenType.subtract)
+            return 3;
+        else if (t.getTokenType() == TokenType.multiply
+                || t.getTokenType() == TokenType.divide
+                || t.getTokenType() == TokenType.modulo)
+            return 4;
         else
             return -1;
     }
 
     // Operator has Left --> Right associativity
     static boolean hasLeftAssociativity(Token t) {
-        return t.getTokenType() == TokenType.add
+        return     t.getTokenType() == TokenType.add
                 || t.getTokenType() == TokenType.subtract
                 || t.getTokenType() == TokenType.divide
-                || t.getTokenType() == TokenType.multiply;
+                || t.getTokenType() == TokenType.multiply
+                || t.getTokenType() == TokenType.bit_shift_left
+                || t.getTokenType() == TokenType.bit_shift_right
+                || t.getTokenType() == TokenType.modulo
+                || t.getTokenType() == TokenType.inequality_equals
+                || t.getTokenType() == TokenType.inequality_lesser
+                || t.getTokenType() == TokenType.inequality_greater
+                || t.getTokenType() == TokenType.and_bool_op
+                || t.getTokenType() == TokenType.or_bool_op
+                || t.getTokenType() == TokenType.xor_bool_op
+                || t.getTokenType() == TokenType.not_bool_op;
     }
-
-    // Method converts  given infixto postfix expression
-    // to illustrate shunting yard algorithm
     public static ArrayList<Token> infixToRpn(ArrayList<Token> expression)
     {
-        // Initialising an empty String
-        // (for output) and an empty stack
+        // Token stack
         Stack<Token> stack = new Stack<>();
 
         // Initially empty string taken

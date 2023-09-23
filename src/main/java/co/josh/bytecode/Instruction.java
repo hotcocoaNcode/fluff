@@ -1,0 +1,33 @@
+package co.josh.bytecode;
+
+public enum Instruction {
+
+    exit,
+    add,
+    subtract,
+    divide,
+    multiply,
+    pushConst16bit,
+    push16bit,
+    pop16bit,
+    conditionalJumpRelative,
+    conditionalJumpExact,
+    setByteConstAddress,
+    setWordConstAddress,
+    pushByteAs16, pushConstByteAs16,
+    lshift,
+    rshift,
+    modulo,
+    popToOutput,
+    pushInputChar,
+    popByte,
+    greater,
+    lesser,
+    equals,
+    nequals,
+    not,
+    or,
+    and,
+    xor,
+    invokeInterpreterMode, copyFromAtPointer, copyFromGetPointer,
+}
