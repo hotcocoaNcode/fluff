@@ -92,7 +92,7 @@ public class RPN {
                     bytes.add(splitted[0]);
                     bytes.add(splitted[1]);
                 } else {
-                    JoshLogger.syntaxError("Variable \"" + name + "\" does not exist!");
+                    JoshLogger.syntaxError("Variable \"" + name + "\" does not exist!", i.getLine());
                 }
             }
         }

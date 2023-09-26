@@ -67,7 +67,7 @@ public class BrainfuckCompilerExtension implements CompilerExtension {
                     }
                 }
             }
-        } else JoshLogger.syntaxError("Brainfuck command must take in a string val!");
+        } else JoshLogger.syntaxError("Brainfuck command must take in a string val!", tokens.get(0).getLine());
 
         bytes.add((byte) 8);
 

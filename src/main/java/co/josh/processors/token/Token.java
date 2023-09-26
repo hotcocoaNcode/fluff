@@ -3,38 +3,31 @@ package co.josh.processors.token;
 public class Token {
     TokenType tokenType;
 
-    public TokenType getRefType() {
-        if (!hasRefType) return null;
-        return refType;
-    }
+    public Object value;
 
-    public void setRefType(TokenType refType) {
-        this.refType = refType;
-        hasRefType = refType != null;
-    }
+    int line;
 
-    TokenType refType;
-    boolean hasRefType;
-    Object value;
+    public Token(TokenType tokenType, Object value, int line) {
+        this.tokenType = tokenType;
+        this.value = value;
+        this.line = line;
+    }
 
     public Token(TokenType tokenType, Object value) {
         this.tokenType = tokenType;
         this.value = value;
+        this.line = -1;
+    }
+
+    public int getLine(){
+        return line;
     }
 
     public TokenType getTokenType() {
         return tokenType;
     }
 
-    public void setTokenType(TokenType tokenType) {
-        this.tokenType = tokenType;
-    }
-
     public Object getValue() {
         return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
     }
 }

@@ -31,7 +31,7 @@ public class v1Tokenizer implements Tokenizer {
     }
 
     @Override
-    public ArrayList<Token> tokenize(String s){
+    public ArrayList<Token> tokenize(String s, String fn){
         ArrayList<Token> t = new ArrayList<>();
         String buf = "";
         boolean inComment = false;
@@ -57,13 +57,13 @@ public class v1Tokenizer implements Tokenizer {
                     }
                     i--;
                     if (keywords.containsKey(buf)) {
-                        t.add(new Token(keywords.get(buf), null));
+                        t.add(new Token(keywords.get(buf), null, i));
                     } else if (buf.equals("true")) {
-                        t.add(new Token(TokenType.boolean_val, true));
+                        t.add(new Token(TokenType.boolean_val, true, i));
                     } else if (buf.equals("false")) {
-                        t.add(new Token(TokenType.boolean_val, false));
+                        t.add(new Token(TokenType.boolean_val, false, i));
                     } else {
-                        t.add(new Token(TokenType.name, buf));
+                        t.add(new Token(TokenType.name, buf, i));
                     }
                     buf = "";
                 } else if (Character.isDigit(s.charAt(i))) {
@@ -86,7 +86,7 @@ public class v1Tokenizer implements Tokenizer {
                     }
                     i--;
                     if (isInt) {
-                        t.add(new Token(TokenType.int_literal, Integer.valueOf(buf)));
+                        t.add(new Token(TokenType.int_literal, Integer.valueOf(buf), i));
                     } else if (decimalCount < 7) {
                         t.add(new Token(TokenType.float_val, Float.valueOf(buf)));
                     } else {
@@ -154,7 +154,7 @@ public class v1Tokenizer implements Tokenizer {
                     if (s.charAt(i + 1) == '\'') {
                         t.add(new Token(TokenType.char_val, s.charAt(i)));
                     } else {
-                        JoshLogger.syntaxError("Character can only be one char in length!");
+                        JoshLogger.syntaxError("Character can only be one char in length!", -1);
                     }
                     i++;
                 } else if (s.charAt(i) == ';') {

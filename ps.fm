@@ -1,0 +1,16 @@
+macro printShort: short num;
+
+short lenpow10 .> 1;
+loop
+    lenpow10 = lenpow10 * 10;
+lif lenpow10 < num;
+
+if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
+    loop
+            /*     number mod (l^10)  / (l^10)/10     + char convert*/
+        cout (num % (lenpow10)) / (lenpow10/10) + '0';
+        lenpow10 = lenpow10 / 10;
+    lif lenpow10 > 1;
+}
+/* do newline */
+cout 10;

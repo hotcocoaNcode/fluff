@@ -41,8 +41,8 @@ public class JoshLogger {
         System.exit(1);
     }
 
-    public static void syntaxError(String description){
-        System.out.println(ANSI_RED + "Syntax Error: " + description + ANSI_RESET);
+    public static void syntaxError(String description, int line){
+        System.out.println(ANSI_RED + "Syntax Error on line "+line+": " + description + ANSI_RESET);
         System.exit(1);
     }
 }

@@ -49,7 +49,7 @@ public class Main {
         try {
             Scanner scanner = new Scanner(f);
             while (scanner.hasNextLine()){
-                built.append(" ").append(scanner.nextLine());
+                built.append("\n").append(scanner.nextLine());
             }
         } catch (IOException e){
             JoshLogger.error("IOException on file read, are you sure it exists?");
@@ -60,7 +60,7 @@ public class Main {
             JoshLogger.log("Got file data");
 
             v1Tokenizer tokenizer = new v1Tokenizer();
-            ArrayList<Token> tokens = tokenizer.tokenize(built.toString());
+            ArrayList<Token> tokens = tokenizer.tokenize(built.toString(), null);
 
             JoshLogger.log("Tokenized");
             co.josh.interpret.v1.Interpreter.interpret(tokens);
@@ -92,10 +92,9 @@ public class Main {
 
         JoshLogger.importantPurple("Compiling to bytecode...");
         v2Tokenizer tokenizer = new v2Tokenizer();
-        ArrayList<Token> tokens = tokenizer.tokenize(built.toString());
-        JoshLogger.log("Tokenized");
+        ArrayList<Token> tokens = tokenizer.tokenize(built.toString(), fileName);
         JoshLogger.log("Bytecode Compiler instantiated with version " + compilerVersion);
-        byte[] bytecode = bytecodeCompiler.compile(tokens);
+        byte[] bytecode = bytecodeCompiler.compile(tokens, true);
         JoshLogger.importantGreen("Done compiling!");
         String outputFileName = fileName.substring(0, fileName.indexOf('.')) + ".fb";
         JoshLogger.importantGreen("Will write to " + outputFileName);

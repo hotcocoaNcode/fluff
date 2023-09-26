@@ -145,12 +145,6 @@ public class BytecodeInterpreter {
                     opstack.push((short) (((hi & 0xFF) << 8) | (lo & 0xFF)));
                 }
 
-                case nequals -> {
-                    short a = opstack.pop();
-                    short b = opstack.pop();
-                    opstack.push(b != a ? (short)1 : (short)0);
-                }
-
                 case pushConstByteAs16 -> {
                     i++;
                     int a = bytecode[i];
@@ -207,13 +201,13 @@ public class BytecodeInterpreter {
                 case or -> {
                     short a = opstack.pop();
                     short b = opstack.pop();
-                    opstack.push((short) ((b | a)));
+                    opstack.push((short) ((b==1 || a==1 ? 1 : 0)));
                 }
 
                 case and -> {
                     short a = opstack.pop();
                     short b = opstack.pop();
-                    opstack.push((short) ((b & a)));
+                    opstack.push((short) ((b==1 && a==1 ? 1 : 0)));
                 }
 
                 case xor -> {
@@ -232,6 +226,12 @@ public class BytecodeInterpreter {
                     short a = opstack.pop();
                     short b = opstack.pop();
                     opstack.push(b == a ? (short)1 : (short)0);
+                }
+
+                case nequals -> {
+                    short a = opstack.pop();
+                    short b = opstack.pop();
+                    opstack.push(b != a ? (short)1 : (short)0);
                 }
 
                 case lesser -> {
@@ -283,7 +283,21 @@ public class BytecodeInterpreter {
                     i++;
                     int hi = bytecode[i];
                     if (opstack.pop() == (short)1){
-                        i = (((hi & 0xFF) << 24) | ((m2 & 0xFF) << 16) | ((m1 & 0xFF) << 8) | (lo & 0xFF));
+                        i = (((hi & 0xFF) << 24) | ((m2 & 0xFF) << 16) | ((m1 & 0xFF) << 8) | (lo & 0xFF))-1;
+                    }
+                }
+
+                case conditionalNotJumpExact -> {
+                    i++;
+                    int lo = bytecode[i];
+                    i++;
+                    int m1 = bytecode[i];
+                    i++;
+                    int m2 = bytecode[i];
+                    i++;
+                    int hi = bytecode[i];
+                    if (opstack.pop() != (short)1){
+                        i = (((hi & 0xFF) << 24) | ((m2 & 0xFF) << 16) | ((m1 & 0xFF) << 8) | (lo & 0xFF))-1;
                     }
                 }
 

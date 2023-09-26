@@ -8,7 +8,7 @@ import java.util.HashMap;
 //Probably will implement this at some point, but just storing reverse of compiler methods for now.
 public class BytecodeReader {
     public static void read(byte[] file, HashMap<Instruction, Byte> bytecodeMap){
-        System.out.println("Raw bytes: ");
+        JoshLogger.importantPurple("Raw bytes: ");
         for (int i = 0; i < file.length; i++){
             if (i != file.length-1) System.out.printf("0x%x, ", file[i]);
             else System.out.printf("0x%x", file[i]);
@@ -18,20 +18,21 @@ public class BytecodeReader {
         for (Instruction i : bytecodeMap.keySet()){
             reversed.put(bytecodeMap.get(i), i);
         }
-        System.out.println("Attempting translation...");
+        JoshLogger.importantPurple("Attempting translation...");
         for (int i = 0; i < file.length; i++){
             Instruction inst = null;
             if (reversed.get(file[i]) != null) inst = reversed.get(file[i]);
-            else JoshLogger.error("Instruction was null. Most likely a reading error has occured.");
+            else JoshLogger.error("Instruction was null. Most likely a reading error has occurred.");
+            System.out.print(JoshLogger.ANSI_BLUE + i + JoshLogger.ANSI_RESET + ": ");
             switch (inst){
                 case exit -> {
-                    System.out.print("exit ");
+                    System.out.print(JoshLogger.ANSI_RED + "exit " + JoshLogger.ANSI_RESET);
                     i++;
                     System.out.print(file[i] + "\n");
                 }
 
                 case invokeInterpreterMode -> {
-                    System.out.print("invokeInterpreterMode ");
+                    System.out.print(JoshLogger.ANSI_RED + "invokeInterpreterMode "  + JoshLogger.ANSI_RESET);
                     i++;
                     String mode = "";
                     while (file[i] != 0){
@@ -44,7 +45,7 @@ public class BytecodeReader {
                 }
 
                 case copyFromAtPointer -> {
-                    System.out.print("pointer_copy_to addr ");
+                    System.out.print(JoshLogger.ANSI_CYAN + "pointer_copy_to " + JoshLogger.ANSI_RESET + "addr ");
                     i++;
                     int lo = file[i];
                     i++;
@@ -59,7 +60,7 @@ public class BytecodeReader {
                 }
 
                 case copyFromGetPointer -> {
-                    System.out.print("set_pointer_at addr ");
+                    System.out.print(JoshLogger.ANSI_CYAN + "set_at_pointer " + JoshLogger.ANSI_RESET + "addr ");
                     i++;
                     int lo = file[i];
                     i++;
@@ -82,13 +83,9 @@ public class BytecodeReader {
                     System.out.print((short)(((hi & 0xFF) << 8) | (lo & 0xFF)) + "\n");
                 }
 
-                case popToOutput -> {
-                    System.out.println("char_out_pop");
-                }
+                case popToOutput -> System.out.println("char_out_pop");
 
-                case pushInputChar -> {
-                    System.out.println("char_in_push");
-                }
+                case pushInputChar -> System.out.println("char_in_push");
 
                 case popByte -> {
                     System.out.print("stack_pop_b_addr ");
@@ -118,7 +115,7 @@ public class BytecodeReader {
                 }
 
                 case push16bit -> {
-                    System.out.print("stack_push_16_addr ");
+                    System.out.print("stack_push_16 addr ");
                     i++;
                     int lo = file[i];
                     i++;
@@ -133,88 +130,48 @@ public class BytecodeReader {
                     System.out.print(a + "\n");
                 }
 
-                case add -> {
-                    System.out.println("add_stack");
-                }
+                case add -> System.out.println(JoshLogger.ANSI_YELLOW + "add_stack" + JoshLogger.ANSI_RESET);
 
-                case subtract -> {
-                    System.out.println("sub_stack");
-                }
+                case subtract -> System.out.println(JoshLogger.ANSI_YELLOW + "subtract_stack" + JoshLogger.ANSI_RESET);
 
-                case divide -> {
-                    System.out.println("divide_stack");
-                }
+                case divide -> System.out.println(JoshLogger.ANSI_YELLOW + "divide_stack" + JoshLogger.ANSI_RESET);
 
-                case multiply -> {
-                    System.out.println("multiply_stack");
-                }
+                case multiply -> System.out.println(JoshLogger.ANSI_YELLOW + "multiply_stack" + JoshLogger.ANSI_RESET);
 
-                case modulo -> {
-                    System.out.println("modulo_stack");
-                }
+                case modulo -> System.out.println(JoshLogger.ANSI_YELLOW + "modulo_stack" + JoshLogger.ANSI_RESET);
 
-                case lshift -> {
-                    System.out.println("left_shift_stack");
-                }
+                case lshift -> System.out.println(JoshLogger.ANSI_YELLOW + "left_shift_stack" + JoshLogger.ANSI_RESET);
 
-                case rshift -> {
-                    System.out.println("right_shift_stack");
-                }
+                case rshift -> System.out.println(JoshLogger.ANSI_YELLOW + "right_shift_stack" + JoshLogger.ANSI_RESET);
 
-                case not -> {
-                    System.out.println("not_stack");
-                }
+                case not -> System.out.println(JoshLogger.ANSI_YELLOW + "not_boolean_stack" + JoshLogger.ANSI_RESET);
 
-                case or -> {
-                    System.out.println("or_stack");
-                }
+                case or -> System.out.println(JoshLogger.ANSI_YELLOW + "or_boolean_stack" + JoshLogger.ANSI_RESET);
 
-                case and -> {
-                    System.out.println("and_stack");
-                }
+                case and -> System.out.println(JoshLogger.ANSI_YELLOW + "and_boolean_stack" + JoshLogger.ANSI_RESET);
 
-                case xor -> {
-                    System.out.println("xor_stack");
-                }
+                case xor -> System.out.println(JoshLogger.ANSI_YELLOW + "xor_stack" + JoshLogger.ANSI_RESET);
 
-                case greater -> {
-                    System.out.println("greater_stack");
-                }
+                case greater -> System.out.println(JoshLogger.ANSI_YELLOW + "greater_inequality_stack" + JoshLogger.ANSI_RESET);
 
-                case equals -> {
-                    System.out.println("equals_stack");
-                }
+                case equals -> System.out.println(JoshLogger.ANSI_YELLOW + "equals_inequality_stack" + JoshLogger.ANSI_RESET);
 
-                case nequals -> {
-                    System.out.println("not_equals_stack");
-                }
+                case nequals -> System.out.println(JoshLogger.ANSI_YELLOW + "not_equals_inequality_stack" + JoshLogger.ANSI_RESET);
 
-                case lesser -> {
-                    System.out.println("lesser_stack");
-                }
+                case lesser -> System.out.println(JoshLogger.ANSI_YELLOW + "lesser_inequality_stack" + JoshLogger.ANSI_RESET);
 
                 case setByteConstAddress -> {
                     System.out.print("set_mem_byte addr ");
-                    i++;
-                    int lo = file[i];
-                    i++;
-                    int hi = file[i];
-                    System.out.print((short)(((hi & 0xFF) << 8) | (lo & 0xFF)));
-                    System.out.print(" const ");
-                    i++;
+                    i = printMemoryJumps(file, i);
                     int a = file[i];
                     System.out.println(a);
                 }
 
                 case setWordConstAddress -> {
                     System.out.print("set_mem_16 addr ");
-                    i++;
-                    int lo = file[i];
-                    i++;
-                    int hi = file[i];
-                    System.out.print((short)(((hi & 0xFF) << 8) | (lo & 0xFF)));
-                    System.out.print(" const ");
-                    i++;
+                    i = printMemoryJumps(file, i);
+                    int lo;
+                    int hi;
                     lo = file[i];
                     i++;
                     hi = file[i];
@@ -222,14 +179,14 @@ public class BytecodeReader {
                 }
 
                 case conditionalJumpRelative -> {
-                    System.out.print("conditionalJumpRelative to byte ");
                     i++;
                     int a = file[i];
-                    System.out.println((i+a) + JoshLogger.ANSI_WHITE + " (gap " + a + ", instruction " + reversed.get(file[i+a]) + ")" + JoshLogger.ANSI_RESET);
+                    System.out.print(JoshLogger.ANSI_GREEN + "conditionalJumpRelative " + JoshLogger.ANSI_RESET + "to byte " + (i+a));
+                    System.out.println(JoshLogger.ANSI_WHITE + " gap " + a + " (" + ((a < 0) ? "likely a loop" : "likely an if statement") + "), instruction " + reversed.get(file[i+a]) +JoshLogger.ANSI_RESET);
                 }
 
-                case conditionalJumpExact -> {
-                    System.out.print("conditionalJumpExact to byte ");
+                case conditionalNotJumpExact -> {
+                    System.out.print(JoshLogger.ANSI_GREEN + "conditionalNotJumpExact " + JoshLogger.ANSI_RESET + "to byte ");
                     i++;
                     int lo = file[i];
                     i++;
@@ -239,8 +196,25 @@ public class BytecodeReader {
                     i++;
                     int hi = file[i];
                     int combined = (((hi & 0xFF) << 24) | ((m2 & 0xFF) << 16) | ((m1 & 0xFF) << 8) | (lo & 0xFF));
+                    int gap = -(i - combined);
                     System.out.print(combined);
-                    System.out.println(JoshLogger.ANSI_WHITE + " (gap " + -(i - combined) + ", instruction " + reversed.get(file[combined]) + ")" +JoshLogger.ANSI_RESET);
+                    System.out.println(JoshLogger.ANSI_WHITE + " gap " + gap + " (" + ((gap < 0) ? "likely a loop" : "likely an if statement") + "), instruction " + reversed.get(file[combined]) +JoshLogger.ANSI_RESET);
+                }
+
+                case conditionalJumpExact -> {
+                    System.out.print(JoshLogger.ANSI_GREEN + "conditionalJumpExact " + JoshLogger.ANSI_RESET + "to byte ");
+                    i++;
+                    int lo = file[i];
+                    i++;
+                    int m1 = file[i];
+                    i++;
+                    int m2 = file[i];
+                    i++;
+                    int hi = file[i];
+                    int combined = (((hi & 0xFF) << 24) | ((m2 & 0xFF) << 16) | ((m1 & 0xFF) << 8) | (lo & 0xFF));
+                    int gap = -(i - combined);
+                    System.out.print(combined);
+                    System.out.println(JoshLogger.ANSI_WHITE + " gap " + gap + " (" + ((gap < 0) ? "likely a loop" : "likely an if statement") + "), instruction " + reversed.get(file[combined]) +JoshLogger.ANSI_RESET);
                 }
 
                 default -> {
@@ -251,30 +225,14 @@ public class BytecodeReader {
         }
     }
 
-    public static float toFloat( int hbits )
-    {
-        int mant = hbits & 0x03ff;            // 10 bits mantissa
-        int exp =  hbits & 0x7c00;            // 5 bits exponent
-        if( exp == 0x7c00 )                   // NaN/Inf
-            exp = 0x3fc00;                    // -> NaN/Inf
-        else if( exp != 0 )                   // normalized value
-        {
-            exp += 0x1c000;                   // exp - 15 + 127
-            if( mant == 0 && exp > 0x1c400 )  // smooth transition
-                return Float.intBitsToFloat( ( hbits & 0x8000 ) << 16
-                        | exp << 13 | 0x3ff );
-        }
-        else if( mant != 0 )                  // && exp==0 -> subnormal
-        {
-            exp = 0x1c400;                    // make it normal
-            do {
-                mant <<= 1;                   // mantissa * 2
-                exp -= 0x400;                 // decrease exp by 1
-            } while( ( mant & 0x400 ) == 0 ); // while not normal
-            mant &= 0x3ff;                    // discard subnormal bit
-        }                                     // else +/-0 -> +/-0
-        return Float.intBitsToFloat(          // combine all parts
-                ( hbits & 0x8000 ) << 16          // sign  << ( 31 - 15 )
-                        | ( exp | mant ) << 13 );         // value << ( 23 - 10 )
+    private static int printMemoryJumps(byte[] file, int i) {
+        i++;
+        int lo = file[i];
+        i++;
+        int hi = file[i];
+        System.out.print((short)(((hi & 0xFF) << 8) | (lo & 0xFF)));
+        System.out.print(" const ");
+        i++;
+        return i;
     }
 }
