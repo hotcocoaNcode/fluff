@@ -20,36 +20,32 @@ public class MacroInfo {
 
     ArrayList<String> argNames = new ArrayList<>();
 
-    public MacroInfo(String fileName) {
-        File f = new File(fileName);
-        try {
-            Scanner fileRead = new Scanner(f);
-            Tokenizer tokenizer = new v2Tokenizer();
-            StringBuilder str = new StringBuilder();
-            while (fileRead.hasNextLine()){
-                str.append(fileRead.nextLine()).append("\n");
+    public MacroInfo(ArrayList<Token> tokens) {
+        this.tokens = tokens;
+        tokens.remove(0);
+        if (tokens.get(0).getTokenType() != TokenType.name) JoshLogger.error("Macro must be followed by name!");
+        name = tokens.remove(0).getValue().toString();
+        while (tokens.get(0).getTokenType() != TokenType.scope_up){
+            if (tokens.get(0).getTokenType() == TokenType.int_var){
+                argTypes.add("int16");
+                tokens.remove(0);
+                argNames.add(tokens.remove(0).getValue().toString());
+            } else if (tokens.get(0).getTokenType() == TokenType.byte_var) {
+                argTypes.add("int8");
+                tokens.remove(0);
+                argNames.add(tokens.remove(0).getValue().toString());
+            } else {
+                JoshLogger.syntaxError("Unexpected token \"" + tokens.get(0).getTokenType() + "\" in macro def! (" + name + ")", tokens.get(0).getLine());
             }
-            tokens = tokenizer.tokenize(str.toString(), fileName);
-            if (tokens.get(0).getTokenType() != TokenType.macro_def) JoshLogger.error("Macro file must start with macro def!");
-            tokens.remove(0);
-            if (tokens.get(0).getTokenType() != TokenType.name) JoshLogger.error("Macro must be followed by name!");
-            name = tokens.remove(0).getValue().toString();
-            while (tokens.get(0).getTokenType() != TokenType.semi){
-                if (tokens.get(0).getTokenType() == TokenType.int_var){
-                    argTypes.add("short");
-                    tokens.remove(0);
-                    argNames.add(tokens.remove(0).getValue().toString());
-                } else if (tokens.get(0).getTokenType() == TokenType.byte_var) {
-                    argTypes.add("byte");
-                    tokens.remove(0);
-                    argNames.add(tokens.remove(0).getValue().toString());
-                } else {
-                    JoshLogger.error("Unexpected token \"" + tokens.get(0).getTokenType() + "\" in macro def! (" + fileName + ")");
-                }
-            }
-            tokens.remove(0);
-        } catch (IOException e) {
-            JoshLogger.error("While trying to read \"" + fileName + "\" an exception occurred\n" + e.getMessage());
         }
+        if (tokens.get(tokens.size()-1).getTokenType() != TokenType.scope_down) JoshLogger.syntaxError("Macro scope not closed!", tokens.get(tokens.size()-1).getLine());
+    }
+
+    ArrayList<Token> use(){
+        ArrayList<Token> ret = new ArrayList<>();
+        for (Token t : tokens){
+            ret.add(new Token(t.getTokenType(), t.getValue(), t.getLine()));
+        }
+        return ret;
     }
 }

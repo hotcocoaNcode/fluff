@@ -12,8 +12,8 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
 
     public v2Tokenizer(){
         //Types
-        keywords.put("byte", TokenType.byte_var);
-        keywords.put("short", TokenType.int_var);
+        keywords.put("int8", TokenType.byte_var);
+        keywords.put("int16", TokenType.int_var);
         //Functions
         keywords.put("cout", TokenType.raw_out);
         keywords.put("exit", TokenType.exit);
@@ -37,23 +37,31 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
         ArrayList<Token> t = new ArrayList<>();
         String buf = "";
         int line = 1;
-        boolean inComment = false;
+        boolean multiLineComment = false;
+        boolean singleLineComment = false;
         for (int i = 0; i < s.length(); i++){
             if (s.charAt(i) == '\n'){
                 line++;
+                singleLineComment = false;
                 continue;
             }
             if (s.charAt(i) == '/' && s.charAt(i+1) == '*'){
-                inComment = true;
+                multiLineComment = true;
                 continue;
             }
+
+            if (s.charAt(i) == '/' && s.charAt(i+1) == '/'){
+                singleLineComment = true;
+                continue;
+            }
+
             if (s.charAt(i) == '*' && s.charAt(i+1) == '/'){
-                inComment = false;
+                multiLineComment = false;
                 i += 2;
                 continue;
             }
-            if (!inComment) {
-                //keywords
+            if (!multiLineComment && !singleLineComment) {
+                //Keywords
                 if (Character.isAlphabetic(s.charAt(i))) {
                     buf = buf + s.charAt(i);
                     i++;
@@ -70,31 +78,48 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     } else if (buf.equals("true")) {
                         t.add(new Token(TokenType.int_literal, 1, line));
                     } else if (buf.equals("false")) {
-                        t.add(new Token(TokenType.int_literal, -1, line));
+                        t.add(new Token(TokenType.int_literal, 0, line));
                     } else {
                         t.add(new Token(TokenType.name, buf, line));
                     }
                     buf = "";
-                } else if (Character.isDigit(s.charAt(i)) || (s.charAt(i) == '-' && Character.isDigit(s.charAt(i+1)))) {
+                }
+                //Hexadecimal Byte
+                else if (s.charAt(i) == '0' && s.charAt(i+1) == 'x'){
                     buf = buf + s.charAt(i);
-                    boolean isInt = true;
-                    i++;
+                    i+=3;
                     for (; i < s.length(); i++) {
-                        if (Character.isDigit(s.charAt(i))) {
+                        if (Character.isLetterOrDigit(s.charAt(i))) {
                             buf = buf + s.charAt(i);
-                        } else if (s.charAt(i) == '.' && isInt) {
-                            buf = buf + s.charAt(i);
-                            isInt = false;
                         } else {
                             break;
                         }
                     }
                     i--;
-                    if (isInt) {
-                        t.add(new Token(TokenType.int_literal, Short.valueOf(buf), line));
-                    } else {
-                        t.add(new Token(TokenType.float_val, Float.valueOf(buf), line));
+                    // THREE COMMANDMENTS OF FLUFF BUILTIN DATA (not documented anywhere bc why not)
+                    // Hexadecimal will always assume the smallest data type
+                    // Decimal will always be short
+                    // Chars will always be bytes
+                    try {
+                        t.add(new Token(TokenType.int_literal, Byte.valueOf(buf, 16), line));
+                    } catch (NumberFormatException e) {
+                        t.add(new Token(TokenType.int_literal, Short.valueOf(buf, 16), line));
                     }
+                    buf = "";
+                }
+                //Short
+                else if (Character.isDigit(s.charAt(i)) || (s.charAt(i) == '-' && Character.isDigit(s.charAt(i+1)))) {
+                    buf = buf + s.charAt(i);
+                    i++;
+                    for (; i < s.length(); i++) {
+                        if (Character.isDigit(s.charAt(i))) {
+                            buf = buf + s.charAt(i);
+                        } else {
+                            break;
+                        }
+                    }
+                    i--;
+                    t.add(new Token(TokenType.int_literal, Short.valueOf(buf), line));
                     buf = "";
                 }
                 //Bracket-like
@@ -155,6 +180,12 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 else if (s.charAt(i) == '=' && s.charAt(i + 1) == '=') {
                     t.add(new Token(TokenType.inequality_equals, null, line));
                     i++;
+                } else if (s.charAt(i) == '>' && s.charAt(i + 1) == '=') {
+                    t.add(new Token(TokenType.inequality_greater_equals, null, line));
+                    i++;
+                } else if (s.charAt(i) == '<' && s.charAt(i + 1) == '=') {
+                    t.add(new Token(TokenType.inequality_lesser_equals, null, line));
+                    i++;
                 } else if (s.charAt(i) == '>') {
                     t.add(new Token(TokenType.inequality_greater, null, line));
                 } else if (s.charAt(i) == '<') {
@@ -176,7 +207,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 }
                 //Other random syntax things that may or may not be used (individually documented)
                 else if (s.charAt(i) == '"') {
-                    //character array
+                    //string
                     i++;
                     for (; i < s.length(); i++) {
                         if (s.charAt(i) != '"') {
@@ -185,7 +216,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                             break;
                         }
                     }
-                    t.add(new Token(TokenType.string_val, buf, line));
+                    t.add(new Token(TokenType.string_val, buf.translateEscapes(), line));
                     buf = "";
                 } else if (s.charAt(i) == '\'') {
                     //char val

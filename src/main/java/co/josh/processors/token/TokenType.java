@@ -64,7 +64,7 @@ public enum TokenType {
     static_scoped_allocate("static_scoped_allocate"),
     raw_out("cout"),
     static_global_allocate("static_global_allocate"),
-    inequality_not_equals("!=");
+    inequality_not_equals("!="), inequality_greater_equals(">="), inequality_lesser_equals("<=");
 
     public String s;
     TokenType(String s) {

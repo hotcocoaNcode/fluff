@@ -7,10 +7,15 @@ import co.josh.processors.expression.eval.RPN;
 import co.josh.processors.expression.shuntingyard.CompilerShuntingYard;
 import co.josh.processors.token.Token;
 import co.josh.processors.token.TokenType;
+import co.josh.processors.token.Tokenizer;
+import co.josh.processors.token.v2.v2Tokenizer;
 
+import java.io.File;
 import java.util.*;
 
 public class FluffCompiler {
+
+    public ArrayList<Byte> header = new ArrayList<>();
 
     public HashMap<Instruction, Byte> bytecodeMap = new HashMap<>();
 
@@ -37,6 +42,7 @@ public class FluffCompiler {
             bytecodeMap.put(Instruction.copyFromAtPointer, (byte) 2); //set memory byte from word pointer <short>
             bytecodeMap.put(Instruction.setWordConstAddress, (byte) 3); //set memory word <short>
             bytecodeMap.put(Instruction.copyFromGetPointer, (byte) 4); //honestly i forgor
+            bytecodeMap.put(Instruction.constantCopyToAtPointer, (byte) 5); //honestly i forgor
             //bytecodeMap.put(Instruction.free, (byte) 6); //free variable
             //bytecodeMap.put(Instruction.malloc, (byte) 7); //runtime allocate for variable
             //Stack math
@@ -53,6 +59,8 @@ public class FluffCompiler {
             bytecodeMap.put(Instruction.equals, (byte) 18); //equals on stack
             bytecodeMap.put(Instruction.lesser, (byte) 19); //lesser on stack
             bytecodeMap.put(Instruction.nequals, (byte) 25); //not_equals on stack
+            bytecodeMap.put(Instruction.greater_equals, (byte) 26); //greater_equals on stack
+            bytecodeMap.put(Instruction.lesser_equals, (byte) 27); //lesser_equals on stack
 
             bytecodeMap.put(Instruction.not, (byte) 20); //bit not on stack
             bytecodeMap.put(Instruction.or, (byte) 22); //bit or on stack
@@ -80,6 +88,29 @@ public class FluffCompiler {
             // The string it parses terminates with \0 and the interpreter will quit if it is not supported
             bytecodeMap.put(Instruction.invokeInterpreterMode, (byte) 60);
             compileTimeMemory = new MemorySpace(16128);
+
+            //Set up file header
+            //Signature of FLOOFI (F100F1)
+            header.add((byte) -15); //F1
+            header.add((byte) 0); //  00
+            header.add((byte) -15); //F1
+            header.add((byte) 0); //Header Length
+            header.add((byte) 0); //Version Major
+            header.add((byte) 5); //Version Minor
+            header.add((byte) 1); //Revision
+            header.add((byte) 1); //Instruction set version
+
+            ArrayList<String> headerAdds = new ArrayList<>();
+            headerAdds.add("cat_cafe");
+            for (String s : headerAdds){
+                for (char c : s.toCharArray()){
+                    header.add((byte) c);
+                }
+                header.add((byte) '_');
+            }
+
+
+            header.set(3, (byte) header.size());
         } else {
             JoshLogger.error("Bytecode revision " + compilerVersion + " does not exist!\n" +
                                         "Are you sure you have given the compiler the correct arguments?");
@@ -100,10 +131,45 @@ public class FluffCompiler {
         for (int i = 0; i < tokens.size(); i++){
             switch (tokens.get(i).getTokenType()) {
                 case include -> {
-                    i++;
-                    String fileName = tokens.get(i).getValue().toString();
-                    MacroInfo newMacro = new MacroInfo(fileName);
-                    macros.put(newMacro.name, newMacro);
+                    try {
+                        i++;
+                        String fileName = tokens.get(i).getValue().toString();
+                        StringBuilder s = new StringBuilder();
+                        Scanner scan = new Scanner(new File(fileName));
+                        while (scan.hasNextLine()){
+                            s.append(scan.nextLine()).append("\n");
+                        }
+                        Tokenizer tokenizer = new v2Tokenizer();
+                        tokens.addAll(i+1, tokenizer.tokenize(s.toString(), fileName));
+                    } catch (Exception e){
+                        throw new RuntimeException(e.toString());
+                    }
+                }
+
+                case macro_def -> {
+                    if (scopeCounter != 0) JoshLogger.syntaxError("Non-include macro def must be at scope 0!", tokens.get(i).getLine());
+                    ArrayList<Token> macroTokens = new ArrayList<>();
+                    while (tokens.get(i-1).getTokenType() != TokenType.scope_up){
+                        macroTokens.add(tokens.get(i));
+                        if (tokens.get(i).getTokenType() == TokenType.scope_up){
+                            scopeCounter++;
+                        } else if (tokens.get(i).getTokenType() == TokenType.scope_down) {
+                            scopeCounter--;
+                        }
+                        i++;
+                    }
+                    while (scopeCounter != 0) {
+                        macroTokens.add(tokens.get(i));
+                        if (tokens.get(i).getTokenType() == TokenType.scope_up){
+                            scopeCounter++;
+                        } else if (tokens.get(i).getTokenType() == TokenType.scope_down) {
+                            scopeCounter--;
+                        }
+                        i++;
+                    }
+                    i--;
+                    MacroInfo macro = new MacroInfo(macroTokens);
+                    macros.put(macro.name, macro);
                 }
 
                 case exit -> {
@@ -148,7 +214,7 @@ public class FluffCompiler {
                     if (tokens.get(i).getTokenType() != TokenType.int_literal
                             || tokens.get(i+1).getTokenType() != TokenType.name
                             || tokens.get(i+2).getTokenType() != TokenType.semi
-                            || !compileTimeMemory.variableTypes.get((String)tokens.get(i+1).getValue()).equals("short")) {
+                            || !compileTimeMemory.variableTypes.get((String)tokens.get(i+1).getValue()).equals("int16")) {
                         JoshLogger.syntaxError("Static memory allocation must always be followed by an integer and a name referring to an integer!", tokens.get(i).getLine());
                     }
                     short address = compileTimeMemory.mapAlloc((short)tokens.get(i).getValue());
@@ -168,7 +234,7 @@ public class FluffCompiler {
                     if (tokens.get(i).getTokenType() != TokenType.int_literal
                             || tokens.get(i+1).getTokenType() != TokenType.name
                             || tokens.get(i+2).getTokenType() != TokenType.semi
-                            || !compileTimeMemory.variableTypes.get((String)tokens.get(i+1).getValue()).equals("short")) {
+                            || !compileTimeMemory.variableTypes.get((String)tokens.get(i+1).getValue()).equals("int16")) {
                         JoshLogger.syntaxError("Static memory allocation must always be followed by an integer and a name referring to an integer!", tokens.get(i).getLine());
                     }
                     short address = compileTimeMemory.mapAlloc((short)tokens.get(i).getValue());
@@ -207,7 +273,7 @@ public class FluffCompiler {
                             }
                         } else {
                             if (tokens.get(i).getTokenType() == TokenType.int_literal) {
-                                if (compileTimeMemory.variableTypes.get(name).equals("short")) {
+                                if (compileTimeMemory.variableTypes.get(name).equals("int16")) {
                                     bytes.add(bytecodeMap.get(Instruction.setWordConstAddress));
                                     bytes.add(indexOfVariable[0]);
                                     bytes.add(indexOfVariable[1]);
@@ -216,7 +282,7 @@ public class FluffCompiler {
                                     Byte[] value = splitShort(Short.parseShort(sizeStr));
                                     bytes.add(value[0]);
                                     bytes.add(value[1]);
-                                } else if (compileTimeMemory.variableTypes.get(name).equals("byte")) {
+                                } else if (compileTimeMemory.variableTypes.get(name).equals("int8")) {
                                     bytes.add(bytecodeMap.get(Instruction.setByteConstAddress));
                                     bytes.add(indexOfVariable[0]);
                                     bytes.add(indexOfVariable[1]);
@@ -246,7 +312,7 @@ public class FluffCompiler {
                         }
                     } else if (tokens.get(i).getTokenType() == TokenType.get_pointer) {
                         i++;
-                        if (!compileTimeMemory.variableTypes.get(name).equals("short")) JoshLogger.syntaxError("Pointers must be a short value!", tokens.get(i).getLine());
+                        if (!compileTimeMemory.variableTypes.get(name).equals("int16")) JoshLogger.syntaxError("Pointers must be a short value!", tokens.get(i).getLine());
                         if (tokens.get(i).getTokenType() == TokenType.name) {
                             compileTimeMemory.pointerTypeMap.put(name, compileTimeMemory.variableTypes.get(tokens.get(i).getValue().toString()));
                             bytes.add(bytecodeMap.get(Instruction.setWordConstAddress));
@@ -261,60 +327,130 @@ public class FluffCompiler {
                         }
                     } else if (tokens.get(i).getTokenType() == TokenType.set_val_at_pointer) {
                         i++;
-                        if (!compileTimeMemory.variableTypes.get(name).equals("short")) JoshLogger.syntaxError("Pointers must be a short value!", tokens.get(i).getLine());
+                        if (!compileTimeMemory.variableTypes.get(name).equals("int16")) JoshLogger.syntaxError("Pointers must be a short value!", tokens.get(i).getLine());
                         if (tokens.get(i).getTokenType() == TokenType.name) {
-                            for (int n = 0; n < compileTimeMemory.variableSizes.get(tokens.get(i).getValue().toString()); n++){
+                            for (short n = 0; n < compileTimeMemory.variableSizes.get(tokens.get(i).getValue().toString()); n++){
                                 bytes.add(bytecodeMap.get(Instruction.copyFromAtPointer));
-                                Byte[] index = splitShort((short) (compileTimeMemory.memoryMap.get(name)+n));
+                                //Address of pointer
+                                Byte[] index = splitShort(compileTimeMemory.memoryMap.get(name));
                                 bytes.add(index[0]);
                                 bytes.add(index[1]);
-                                index = splitShort((short) (compileTimeMemory.memoryMap.get(tokens.get(i).getValue().toString())+n));
+                                //Address of value we set address at pointer to
+                                index = splitShort(compileTimeMemory.memoryMap.get(tokens.get(i).getValue().toString()));
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                                index = splitShort(n);
                                 bytes.add(index[0]);
                                 bytes.add(index[1]);
                             }
+                        } else if (tokens.get(i).getTokenType() == TokenType.int_literal) {
+                            //Is Byte
+                            if (tokens.get(i).getValue() instanceof Byte){
+                                bytes.add(bytecodeMap.get(Instruction.constantCopyToAtPointer));
+                                //pointer to address
+                                Byte[] index = splitShort(compileTimeMemory.memoryMap.get(name));
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                                //const
+                                bytes.add((byte) tokens.get(i).getValue());
+                                //add to address
+                                bytes.add((byte) 0);
+                                bytes.add((byte) 0);
+                            }
+                            else {
+                                bytes.add(bytecodeMap.get(Instruction.constantCopyToAtPointer));
+                                //pointer to address
+                                Byte[] index = splitShort(compileTimeMemory.memoryMap.get(name));
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                                Byte[] shortVal = splitShort((short) tokens.get(i).getValue());
+                                //const
+                                bytes.add(shortVal[0]);
+                                //add to address
+                                bytes.add((byte) 0);
+                                bytes.add((byte) 0);
+
+                                //set lower byte
+                                bytes.add(bytecodeMap.get(Instruction.constantCopyToAtPointer));
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                                //const
+                                bytes.add(shortVal[1]);
+                                //add to address
+                                bytes.add((byte) 1);
+                                bytes.add((byte) 0);
+                            }
+                        }
+                        else if (tokens.get(i).getTokenType() == TokenType.string_val){
+                            char[] charArr = tokens.get(i).getValue().toString().toCharArray();
+                            short n = 0;
+                            for (; n < charArr.length; n++){
+                                bytes.add(bytecodeMap.get(Instruction.constantCopyToAtPointer));
+                                //pointer to address
+                                Byte[] index = splitShort(compileTimeMemory.memoryMap.get(name));
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                                //const
+                                bytes.add((byte) charArr[n]);
+                                //add to address
+                                index = splitShort(n);
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                            }
+                            bytes.add(bytecodeMap.get(Instruction.constantCopyToAtPointer));
+                            //pointer to grab address from
+                            Byte[] index = splitShort(compileTimeMemory.memoryMap.get(name));
+                            bytes.add(index[0]);
+                            bytes.add(index[1]);
+                            //stop
+                            bytes.add((byte) 0);
+                            index = splitShort(n);
+                            bytes.add(index[0]);
+                            bytes.add(index[1]);
                         } else {
-                            JoshLogger.syntaxError("Pointer declaration must be followed by a name!", tokens.get(i).getLine());
+                            JoshLogger.syntaxError("Pointer declaration must be followed by a name!", tokens.get(i+1).getLine());
                         }
                     } else if (tokens.get(i).getTokenType() == TokenType.get_val_at_pointer) {
                         i++;
-                        if (!compileTimeMemory.variableTypes.get(name).equals("short")) JoshLogger.syntaxError("Pointers must be a short value!", tokens.get(i).getLine());
+                        if (!compileTimeMemory.variableTypes.get(name).equals("int16")) JoshLogger.syntaxError("Pointers must be a short value!", tokens.get(i).getLine());
                         if (tokens.get(i).getTokenType() == TokenType.name) {
-                            for (int n = 0; n < compileTimeMemory.variableSizes.get(tokens.get(i).getValue().toString()); n++){
+                            for (short n = 0; n < compileTimeMemory.variableSizes.get(tokens.get(i).getValue().toString()); n++){
                                 // Absolutely fucking horrid pointer implementation
                                 // This goes for get at, set at, and get pointer
                                 bytes.add(bytecodeMap.get(Instruction.copyFromGetPointer));
                                 //pointer to grab address from
-                                Byte[] index = splitShort((short) (compileTimeMemory.memoryMap.get(name)+n));
+                                Byte[] index = splitShort((compileTimeMemory.memoryMap.get(name)));
                                 bytes.add(index[0]);
                                 bytes.add(index[1]);
                                 //address
-                                index = splitShort((short) (compileTimeMemory.memoryMap.get(tokens.get(i).getValue().toString())+n));
+                                index = splitShort((compileTimeMemory.memoryMap.get(tokens.get(i).getValue().toString())));
+                                bytes.add(index[0]);
+                                bytes.add(index[1]);
+                                index = splitShort(n);
                                 bytes.add(index[0]);
                                 bytes.add(index[1]);
                             }
                         } else {
-                            JoshLogger.syntaxError("Pointer declaration must be followed by a name!", tokens.get(i).getLine());
+                            JoshLogger.syntaxError("Pointer declaration must be followed by a name!", tokens.get(i+1).getLine());
                         }
                     } else if (macros.containsKey(name)){
                         JoshLogger.log("Inserting macro " + name + ".");
-                        // time to start coding better...
-                        // apparently using raw arraylists is bad so now using List<Object>
                         MacroInfo macro = macros.get(name);
                         HashMap<String, String> nameMatch = new HashMap<>();
                         int a = 0;
+                        //Argument processing
                         while (tokens.get(i).getTokenType() != TokenType.semi) {
                             if (tokens.get(i).getTokenType() != TokenType.name)
                                 JoshLogger.syntaxError("Unexpected token \"" + tokens.get(i).getTokenType() + "\" in macro usage!", tokens.get(i).getLine());
                             if (!compileTimeMemory.variableTypes.get(tokens.get(i).getValue().toString()).equals(macro.argTypes.get(a))){
-                                JoshLogger.syntaxError("Non-matching types \"" + compileTimeMemory.variableTypes.get(tokens.get(i).getValue().toString()) + "\" and " + macro.argTypes.get(a) + " in macro usage!", tokens.get(i).getLine());
+                                JoshLogger.syntaxError("Non-matching types \"" + compileTimeMemory.variableTypes.get(tokens.get(i).getValue().toString()) + "\" and \"" + macro.argTypes.get(a) + "\" in macro usage!", tokens.get(i).getLine());
                             }
                             nameMatch.put(macro.argNames.get(a), tokens.get(i).getValue().toString());
                             a++;
                             i++;
                         }
-                        ArrayList<Token> macroTokens = macro.tokens;
-                        macroTokens.add(0, new Token(TokenType.scope_up, null));
-                        macroTokens.add(new Token(TokenType.scope_down, null));
+                        List<Token> macroTokens = macro.use();
+                        //Scope the macro.
                         for (int n = 0; n < macroTokens.size(); n++){
                             if (macroTokens.get(n).getTokenType() == TokenType.name
                             && nameMatch.containsKey(macroTokens.get(n).getValue().toString())){
@@ -444,7 +580,7 @@ public class FluffCompiler {
                             if (tokens.get(i).getTokenType() == TokenType.int_literal) {
                                 Short address = compileTimeMemory.mapAlloc(2);
                                 JoshLogger.log("New short (size 2) \"" + name + "\", storing at " + address);
-                                compileTimeMemory.addNew(name, "short", address, scopeCounter, 2);
+                                compileTimeMemory.addNew(name, "int16", address, scopeCounter, 2);
                                 Byte[] value = splitShort(address);
                                 bytes.add(value[0]);
                                 bytes.add(value[1]);
@@ -465,7 +601,7 @@ public class FluffCompiler {
                             }
                             Short address = compileTimeMemory.mapAlloc(2);
                             JoshLogger.log("New short (size 2) \"" + name + "\", storing at " + address);
-                            compileTimeMemory.addNew(name, "short", address, scopeCounter, 2);
+                            compileTimeMemory.addNew(name, "int16", address, scopeCounter, 2);
                             Byte[] value = splitShort(address);
                             bytes.add(value[0]);
                             bytes.add(value[1]);
@@ -500,7 +636,7 @@ public class FluffCompiler {
                                 String sizeStr = tokens.get(i).getValue().toString();
                                 Short address = compileTimeMemory.mapAlloc(1);
                                 JoshLogger.log("New byte (size 1) \"" + name + "\", storing at " + address);
-                                compileTimeMemory.addNew(name, "byte", address, scopeCounter, 1);
+                                compileTimeMemory.addNew(name, "int8", address, scopeCounter, 1);
                                 Byte[] value = splitShort(address);
                                 bytes.add(value[0]);
                                 bytes.add(value[1]);
@@ -525,7 +661,7 @@ public class FluffCompiler {
                                 //Address and allocation
                                 Short address = compileTimeMemory.mapAlloc(1);
                                 JoshLogger.log("New byte (size 1) \"" + name + "\", storing at " + address);
-                                compileTimeMemory.addNew(name, "byte", address, scopeCounter, 1);
+                                compileTimeMemory.addNew(name, "int8", address, scopeCounter, 1);
                                 Byte[] value = splitShort(address);
                                 bytes.add(value[0]);
                                 bytes.add(value[1]);
@@ -547,6 +683,7 @@ public class FluffCompiler {
                 }
             }
         }
+        bytes.addAll(0, header);
         byte[] returnVal = new byte[bytes.size()];
         for (int i = 0; i < bytes.size(); i++){
             returnVal[i] = bytes.get(i);
@@ -566,7 +703,6 @@ public class FluffCompiler {
         bytes.addAll(RPN.compRPN_ints(expression, bytecodeMap, compileTimeMemory));
         return i;
     }
-
     public static byte[] splitInt(int value) {
         return new byte[] {
                 (byte)value,

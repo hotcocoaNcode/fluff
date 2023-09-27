@@ -17,7 +17,7 @@ public class BytecodeInterpreter {
         HashMap<Byte, Instruction> reversed = new HashMap<>();
         Scanner sc = new Scanner(System.in);
         String scannerLine = "";
-        for (Instruction i : compiler.bytecodeMap.keySet()){
+        for (Instruction i : compiler.bytecodeMap.keySet()) {
             reversed.put(compiler.bytecodeMap.get(i), i);
         }
         for (int i = 0; i < bytecode.length; i++){
@@ -53,37 +53,63 @@ public class BytecodeInterpreter {
                     int lo = bytecode[i];
                     i++;
                     int hi = bytecode[i];
-                    int addressTo = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    int pointerAddress = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
                     i++;
                     lo = bytecode[i];
                     i++;
                     hi = bytecode[i];
                     int addressFrom = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
-                    lo = ram[addressTo];
-                    hi = ram[addressTo+1];
-                    int pointerval = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
-                    ram[pointerval] = ram[addressFrom];
-                }
-
-
-                case copyFromGetPointer -> {
-                    //set_pointer_at addr
-                    i++;
-                    int lo = bytecode[i];
-                    i++;
-                    int hi = bytecode[i];
-                    //
-                    int addressTo = (short) (((hi & 0xFF) << 8) | (lo & 0xFF)); //Pointer address
+                    lo = ram[pointerAddress];
+                    hi = ram[pointerAddress+1];
+                    int addressTo = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
                     i++;
                     lo = bytecode[i];
                     i++;
                     hi = bytecode[i];
-                    //at 6
-                    int addressFrom = (short) (((hi & 0xFF) << 8) | (lo & 0xFF)); //Item to set address
-                    lo = ram[addressTo];
-                    hi = ram[addressTo+1];
-                    int pointerval = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
-                    ram[addressFrom] = ram[pointerval];
+                    int offset = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    ram[addressTo+offset] = ram[addressFrom+offset]; //Set value at pointer to value at other address
+                }
+
+                case constantCopyToAtPointer -> {
+                    i++;
+                    int lo = bytecode[i];
+                    i++;
+                    int hi = bytecode[i];
+                    int pointerAddress = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    i++;
+                    byte constant = bytecode[i];
+                    lo = ram[pointerAddress];
+                    hi = ram[pointerAddress+1];
+                    int addressTo = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    i++;
+                    lo = bytecode[i];
+                    i++;
+                    hi = bytecode[i];
+                    int offset = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    ram[addressTo+offset] = constant; //Set value at pointer constant byte
+                }
+
+
+                case copyFromGetPointer -> {
+                    i++;
+                    int lo = bytecode[i];
+                    i++;
+                    int hi = bytecode[i];
+                    int pointerAddress = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    i++;
+                    lo = bytecode[i];
+                    i++;
+                    hi = bytecode[i];
+                    int addressFrom = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    lo = ram[pointerAddress];
+                    hi = ram[pointerAddress+1];
+                    int addressTo = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    i++;
+                    lo = bytecode[i];
+                    i++;
+                    hi = bytecode[i];
+                    int offset = (short) (((hi & 0xFF) << 8) | (lo & 0xFF));
+                    ram[addressFrom+offset] = ram[addressTo+offset]; //Get the value at pointer and set value at other address
                 }
 
                 case pushConst16bit -> {
@@ -238,6 +264,18 @@ public class BytecodeInterpreter {
                     short a = opstack.pop();
                     short b = opstack.pop();
                     opstack.push(b < a ? (short)1 : (short)0);
+                }
+
+                case lesser_equals -> {
+                    short a = opstack.pop();
+                    short b = opstack.pop();
+                    opstack.push(b <= a ? (short)1 : (short)0);
+                }
+
+                case greater_equals -> {
+                    short a = opstack.pop();
+                    short b = opstack.pop();
+                    opstack.push(b >= a ? (short)1 : (short)0);
                 }
 
                 case setByteConstAddress -> {

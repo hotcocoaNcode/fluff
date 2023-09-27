@@ -72,8 +72,20 @@ public class Main {
 
         if (interpretMode){
             try{
-                byte[] a = Files.readAllBytes(f.toPath());
-                BytecodeInterpreter.interpretBytecode(a, bytecodeCompiler, 65023);
+                byte[] file = Files.readAllBytes(f.toPath());
+                int b1 = file[0] & 0xff;
+                int b2 = file[1] & 0xff;
+                int b3 = file[2] & 0xff;
+                boolean isValidFluffBytecode =
+                        b1 == 0xf1 && b2 == 0x00 && b3 == 0xf1;
+                if (!isValidFluffBytecode) JoshLogger.error("Non-valid bytecode!");
+                int headerSize = file[3];
+                //Bytecode removes header
+                byte[] bytecode = new byte[file.length-headerSize];
+                //Clone important parts of array
+                if (file.length - headerSize >= 0)
+                    System.arraycopy(file, headerSize, bytecode, 0, file.length - headerSize);
+                BytecodeInterpreter.interpretBytecode(bytecode, bytecodeCompiler, 65023);
             } catch (IOException e){
                 throw new RuntimeException("IOException");
             }
@@ -96,16 +108,23 @@ public class Main {
         JoshLogger.log("Bytecode Compiler instantiated with version " + compilerVersion);
         byte[] bytecode = bytecodeCompiler.compile(tokens, true);
         JoshLogger.importantGreen("Done compiling!");
-        String outputFileName = fileName.substring(0, fileName.indexOf('.')) + ".fb";
-        JoshLogger.importantGreen("Will write to " + outputFileName);
+        String outputFileName = "out/" + fileName.substring(0, fileName.indexOf('.')) + ".fb";
+        JoshLogger.importantGreen("Will write to ./" + outputFileName);
         File outputFile = new File(outputFileName);
+        File outDir = new File("out/");
         try {
-            boolean a = outputFile.createNewFile();
+            if (outDir.mkdir()) {
+                JoshLogger.importantGreen("Created /out/ directory");
+            }
+            if (outputFile.createNewFile()) {
+                JoshLogger.importantGreen("Created file");
+            }
         } catch (IOException e){
             JoshLogger.error("Could not write to file: " + fileName.substring(0, fileName.indexOf('.')) + ".fb");
         }
         try (FileOutputStream fos = new FileOutputStream(outputFileName)) {
             fos.write(bytecode);
+            JoshLogger.importantGreen("Done writing to file!");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

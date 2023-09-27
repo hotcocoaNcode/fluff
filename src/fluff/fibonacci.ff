@@ -1,0 +1,65 @@
+include "macros/printStr.fm"    // Out of file macro test
+include "macros/newLine.fm"    // No reason for this to exist other than testing macro with no arguments
+
+macro printShort: int16 num { // In file macro test
+    int16 lenpow10 .> 1;
+    loop
+        lenpow10 = lenpow10 * 10;
+    lif lenpow10 < num;
+
+    if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
+        loop
+                /*     number mod (l^10)  / (l^10)/10     + char convert*/
+            cout (num % (lenpow10)) / (lenpow10/10) + '0';
+            lenpow10 = lenpow10 / 10;
+        lif lenpow10 > 1;
+    }
+}
+
+macro printByte: int8 num { // Multiple in file macros test
+    int16 lenpow10 .> 1;
+    loop
+        lenpow10 = lenpow10 * 10;
+    lif lenpow10 < num;
+
+    if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
+        loop
+                /*     number mod (l^10)  / (l^10)/10     + char convert*/
+            cout (num % (lenpow10)) / (lenpow10/10) + '0';
+            lenpow10 = lenpow10 / 10;
+        lif lenpow10 > 1;
+    }
+}
+
+int16 last1 = 0;
+int16 last2 = 1;
+int16 current = 0;
+int8 i = 0;
+
+int16 strAddress = 0;
+cgalloc 10 strAddress;
+
+loop {
+    //Fibonacci calculation
+    current = last1 + last2;
+    last2 = last1;
+    last1 = current;
+    i = i + 1;
+
+    //Put "i: " to string address
+    strAddress <- "i: ";
+    //Print it out with macro
+    printString strAddress;
+    printByte i;
+    newLine;
+
+    //Same thing here with "n: "
+    strAddress <- "n: ";
+    printString strAddress;
+    printShort current;
+    newLine;
+
+    //Separate the lines so it doesn't look all mushed together
+    newLine;
+} lif i < 20;
+exit 0;

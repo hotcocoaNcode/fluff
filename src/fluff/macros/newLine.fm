@@ -1,0 +1,3 @@
+macro newLine {
+    cout 10;
+}

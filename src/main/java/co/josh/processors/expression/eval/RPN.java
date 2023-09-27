@@ -59,6 +59,12 @@ public class RPN {
             else if(i.getTokenType() == TokenType.inequality_not_equals){
                 bytes.add(instructions.get(Instruction.nequals));
             }
+            else if(i.getTokenType() == TokenType.inequality_lesser_equals){
+                bytes.add(instructions.get(Instruction.lesser_equals));
+            }
+            else if(i.getTokenType() == TokenType.inequality_greater_equals){
+                bytes.add(instructions.get(Instruction.greater_equals));
+            }
             else if(i.getTokenType() == TokenType.not_bool_op){
                 bytes.add(instructions.get(Instruction.not));
             }
@@ -79,9 +85,9 @@ public class RPN {
             } else if (i.getTokenType() == TokenType.name){
                 String name = i.getValue().toString();
                 if (memorySpace.variableSizes.containsKey(name)){
-                    if (memorySpace.variableTypes.get(name).equals("short")){
+                    if (memorySpace.variableTypes.get(name).equals("int16")){
                         bytes.add(instructions.get(Instruction.push16bit));
-                    } else if (memorySpace.variableTypes.get(name).equals("byte")){
+                    } else if (memorySpace.variableTypes.get(name).equals("int8")){
                         bytes.add(instructions.get(Instruction.pushByteAs16));
                     } else {
                         JoshLogger.importantPurple("Achievement Get: How did we get here?");

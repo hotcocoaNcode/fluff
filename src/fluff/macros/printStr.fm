@@ -1,0 +1,11 @@
+macro printString: int16 address {
+    int16 iter = address;
+    int8 temp = 0;
+    address -> temp;
+    loop {
+        cout temp;
+        iter = iter + 1;
+        iter -> temp;
+    }
+    lif temp != 0;
+}

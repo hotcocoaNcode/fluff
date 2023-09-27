@@ -37,7 +37,7 @@ public class MemorySpace {
             Integer size1 = variableSizes.get(s);
             //Check every index that new object will be taking up for collision
             for (int i = 0; i < size; i++){
-                // check against every block index
+                // check against every block index TODO: This is a dirty shitty fix. This could all be better.
                 for (Integer _int : blockIndices.keySet()){
                     //  ret < start || ret >= end means outside of bounds
                     if ((ret+i >= _int) && (ret+i < _int+blockIndices.get(_int))) {
@@ -80,12 +80,13 @@ public class MemorySpace {
     }
 
 
-    Integer boc = 0; //Wrapper type for toString
+    Integer boc = 0; //Wrapper type for toString TODO what the fuck is this for?
     public void blockOff(int address, int size) {
         memoryMap.put(boc.toString(), (short) address);
         variableSizes.put(boc.toString(), size);
         variableScopes.put(boc.toString(), -1);
         variableTypes.put(boc.toString(), null);
+        boc++;
     }
 
     public void blockOffScoped(int address, int size, int scope) {
@@ -93,5 +94,6 @@ public class MemorySpace {
         variableSizes.put(boc.toString(), size);
         variableScopes.put(boc.toString(), scope);
         variableTypes.put(boc.toString(), null);
+        boc++;
     }
 }

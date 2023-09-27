@@ -29,5 +29,5 @@ public enum Instruction {
     or,
     and,
     xor,
-    invokeInterpreterMode, copyFromAtPointer, copyFromGetPointer, conditionalNotJumpExact,
+    invokeInterpreterMode, copyFromAtPointer, copyFromGetPointer, conditionalNotJumpExact, lesser_equals, greater_equals, constantCopyToAtPointer,
 }
