@@ -130,7 +130,7 @@ public class FluffCompiler {
         Stack<Integer> ifStatementScopes = new Stack<>();
         for (int i = 0; i < tokens.size(); i++){
             switch (tokens.get(i).getTokenType()) {
-                case include -> {
+                case include_file -> {
                     try {
                         i++;
                         String fileName = tokens.get(i).getValue().toString();
@@ -184,7 +184,7 @@ public class FluffCompiler {
                     }
                 }
 
-                case memfree -> {
+                case free_variable -> {
                     i++;
                     if (tokens.get(i).getTokenType() == TokenType.name){
                         String name = tokens.get(i).getValue().toString();
@@ -197,17 +197,6 @@ public class FluffCompiler {
                         JoshLogger.syntaxError("Free requires variable name after usage!", tokens.get(i).getLine());
                     }
                 }
-
-                /*case macro_def -> {
-                    bytes.add(bytecodeMap.get(Instruction.newmacro)); //TODO currently nop
-                    i++;
-                    if (tokens.get(i).getTokenType() == TokenType.name){
-                        macros.put(tokens.get(i).getValue().toString(), (short) macroCount);
-                        macroCount++;
-                    } else {
-                        JoshLogger.syntaxError("Macro must have non-keyword name!");
-                    }
-                }*/
 
                 case static_global_allocate -> {
                     i++;
@@ -549,12 +538,12 @@ public class FluffCompiler {
                     }
                 }
 
-                case raw_out -> {
+                case character_out -> {
                     i = evaluateIntExpr(tokens, i);
                     bytes.add(bytecodeMap.get(Instruction.popToOutput));
                 }
 
-                case input -> {
+                case character_input -> {
                     i++;
                     if (tokens.get(i).getTokenType() != TokenType.name) JoshLogger.syntaxError("Name must be after input!", tokens.get(i).getLine());
                     bytes.add(bytecodeMap.get(Instruction.pushInputChar));
@@ -565,7 +554,7 @@ public class FluffCompiler {
                 }
 
 
-                case int_var -> {
+                case int16_variable -> {
                     bytes.add(bytecodeMap.get(Instruction.setWordConstAddress));
                     int line = tokens.get(i).getLine();
                     i++;
@@ -621,7 +610,7 @@ public class FluffCompiler {
                     }
                 }
 
-                case byte_var -> {
+                case int8_variable -> {
                     bytes.add(bytecodeMap.get(Instruction.setByteConstAddress));
                     i++;
                     if (tokens.get(i).getTokenType() == TokenType.name && !compileTimeMemory.variableTypes.containsKey(tokens.get(i).getValue().toString())){

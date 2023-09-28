@@ -11,15 +11,15 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
     HashMap<String, TokenType> keywords = new HashMap<>();
 
     public v2Tokenizer(){
-        //Types
-        keywords.put("int8", TokenType.byte_var);
-        keywords.put("int16", TokenType.int_var);
+        //Built in types
+        keywords.put("int8", TokenType.int8_variable);
+        keywords.put("int16", TokenType.int16_variable);
         //Functions
-        keywords.put("cout", TokenType.raw_out);
+        keywords.put("cout", TokenType.character_out);
         keywords.put("exit", TokenType.exit);
-        keywords.put("cin", TokenType.input);
-        keywords.put("include", TokenType.include);
-        keywords.put("free", TokenType.memfree);
+        keywords.put("cin", TokenType.character_input);
+        keywords.put("include", TokenType.include_file);
+        keywords.put("free", TokenType.free_variable);
         keywords.put("csalloc", TokenType.static_scoped_allocate);
         keywords.put("cgalloc", TokenType.static_global_allocate);
         //Conditionals

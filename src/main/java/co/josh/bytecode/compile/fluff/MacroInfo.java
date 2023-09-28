@@ -3,13 +3,8 @@ package co.josh.bytecode.compile.fluff;
 import co.josh.JoshLogger;
 import co.josh.processors.token.Token;
 import co.josh.processors.token.TokenType;
-import co.josh.processors.token.Tokenizer;
-import co.josh.processors.token.v2.v2Tokenizer;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class MacroInfo {
     ArrayList<Token> tokens;
@@ -26,11 +21,11 @@ public class MacroInfo {
         if (tokens.get(0).getTokenType() != TokenType.name) JoshLogger.error("Macro must be followed by name!");
         name = tokens.remove(0).getValue().toString();
         while (tokens.get(0).getTokenType() != TokenType.scope_up){
-            if (tokens.get(0).getTokenType() == TokenType.int_var){
+            if (tokens.get(0).getTokenType() == TokenType.int16_variable){
                 argTypes.add("int16");
                 tokens.remove(0);
                 argNames.add(tokens.remove(0).getValue().toString());
-            } else if (tokens.get(0).getTokenType() == TokenType.byte_var) {
+            } else if (tokens.get(0).getTokenType() == TokenType.int8_variable) {
                 argTypes.add("int8");
                 tokens.remove(0);
                 argNames.add(tokens.remove(0).getValue().toString());

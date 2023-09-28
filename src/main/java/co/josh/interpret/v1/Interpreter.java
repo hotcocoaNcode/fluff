@@ -117,7 +117,7 @@ public class Interpreter {
                     }
 
                     //Is Integer Variable
-                    else if (tokens.get(i).getTokenType() == TokenType.int_var){
+                    else if (tokens.get(i).getTokenType() == TokenType.int16_variable){
                         i++;
                         if (tokens.get(i).getTokenType() == TokenType.name){
                             String name = (String)tokens.get(i).getValue();
@@ -294,7 +294,7 @@ public class Interpreter {
                             System.out.println("lif: expression was not a boolean!");
                             System.exit(1);
                         }
-                    } else if (tokens.get(i).getTokenType() == TokenType.input){
+                    } else if (tokens.get(i).getTokenType() == TokenType.character_input){
                         if (tokens.get(i+1).getTokenType() == TokenType.name){
                             i++;
                             if (runtimeVars.containsKey((String)tokens.get(i).getValue())){

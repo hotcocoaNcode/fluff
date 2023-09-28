@@ -1,35 +1,4 @@
-include "macros/printStr.fm"    // Out of file macro test
-include "macros/newLine.fm"    // No reason for this to exist other than testing macro with no arguments
-
-macro printShort: int16 num { // In file macro test
-    int16 lenpow10 .> 1;
-    loop
-        lenpow10 = lenpow10 * 10;
-    lif lenpow10 < num;
-
-    if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
-        loop
-                /*     number mod (l^10)  / (l^10)/10     + char convert*/
-            cout (num % (lenpow10)) / (lenpow10/10) + '0';
-            lenpow10 = lenpow10 / 10;
-        lif lenpow10 > 1;
-    }
-}
-
-macro printByte: int8 num { // Multiple in file macros test
-    int16 lenpow10 .> 1;
-    loop
-        lenpow10 = lenpow10 * 10;
-    lif lenpow10 < num;
-
-    if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
-        loop
-                /*     number mod (l^10)  / (l^10)/10     + char convert*/
-            cout (num % (lenpow10)) / (lenpow10/10) + '0';
-            lenpow10 = lenpow10 / 10;
-        lif lenpow10 > 1;
-    }
-}
+include "macros/print.fm"
 
 int16 last1 = 0;
 int16 last2 = 1;

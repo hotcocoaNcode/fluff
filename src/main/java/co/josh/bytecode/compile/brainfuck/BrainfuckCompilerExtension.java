@@ -9,6 +9,7 @@ import co.josh.processors.token.TokenType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.Stack;
 
 public class BrainfuckCompilerExtension implements CompilerExtension {
@@ -79,6 +80,7 @@ public class BrainfuckCompilerExtension implements CompilerExtension {
         int pointer = 0;
         byte[] _ram = ram.clone();
         Stack<Integer> loops = new Stack<>();
+        Scanner scanner = new Scanner(System.in);
         for (; i < bytecode.length; i++){
             if (pointer < 0){
                 JoshLogger.error("Brainfuck pointer lower than 0!");
@@ -110,7 +112,7 @@ public class BrainfuckCompilerExtension implements CompilerExtension {
                     System.out.print((char)_ram[pointer]);
                 }
                 case (7) -> {
-                    //TODO
+                    _ram[pointer]=(byte)scanner.nextLine().charAt(0);
                 }
                 case (8) -> {
                     return i;

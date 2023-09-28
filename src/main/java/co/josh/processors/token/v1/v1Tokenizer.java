@@ -14,7 +14,7 @@ public class v1Tokenizer implements Tokenizer {
 
     public v1Tokenizer(){
         //Types
-        keywords.put("int", TokenType.int_var);
+        keywords.put("int", TokenType.int16_variable);
         keywords.put("string", TokenType.string_var);
         keywords.put("float", TokenType.float_var);
         keywords.put("boolean", TokenType.boolean_var);
@@ -22,7 +22,7 @@ public class v1Tokenizer implements Tokenizer {
         keywords.put("println", TokenType.println);
         keywords.put("print", TokenType.print);
         keywords.put("exit", TokenType.exit);
-        keywords.put("input", TokenType.input);
+        keywords.put("input", TokenType.character_input);
         //Conditionals
         keywords.put("if", TokenType._if);
         keywords.put("lif", TokenType.loopback_if);
