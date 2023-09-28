@@ -87,7 +87,7 @@ public class Main {
                     System.arraycopy(file, headerSize, bytecode, 0, file.length - headerSize);
                 BytecodeInterpreter.interpretBytecode(bytecode, bytecodeCompiler, 65023);
             } catch (IOException e){
-                throw new RuntimeException("IOException");
+                JoshLogger.error("IOException");
             }
             return;
         }
@@ -97,7 +97,7 @@ public class Main {
                 byte[] a = Files.readAllBytes(f.toPath());
                 BytecodeReader.read(a, bytecodeCompiler.bytecodeMap);
             } catch (IOException e){
-                throw new RuntimeException("IOException");
+                JoshLogger.error("IOException");
             }
             return;
         }
@@ -126,7 +126,7 @@ public class Main {
             fos.write(bytecode);
             JoshLogger.importantGreen("Done writing to file!");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            JoshLogger.error(e.toString());
         }
     }
 }

@@ -58,11 +58,9 @@ public class Expression {
                     System.exit(1);
                 }
             }
-            if (t.getTokenType() == TokenType.add){
-                if (isBool){
-                    System.out.println("Expression error: concatenation or math in boolean!");
-                    System.exit(1);
-                }
+            if (t.getTokenType() == TokenType.add && isBool){
+                System.out.println("Expression error: concatenation or math in boolean!");
+                System.exit(1);
             }
         }
         if (isBool){
@@ -73,72 +71,6 @@ public class Expression {
         } else {
             if (floats) return RPN.evalRPN_floats(NumericalShuntingYard.infixToRpn(tokens));
             else return RPN.evalRPN_ints(NumericalShuntingYard.infixToRpn(tokens));
-        }
-    }
-
-    public static int expressionType(ArrayList<Token> tokens){
-        boolean concat = false;
-        boolean isBool = false;
-        boolean floats = false;
-        if (tokens.size() == 3 && (tokens.get(1).getTokenType() == TokenType.inequality_equals
-                || (tokens.get(1).getTokenType()  == TokenType.inequality_greater)
-                || (tokens.get(1).getTokenType()  == TokenType.inequality_lesser))){
-            if ((tokens.get(1).getTokenType()  == TokenType.inequality_greater)
-                    || (tokens.get(1).getTokenType()  == TokenType.inequality_lesser)){
-                nonNumberCheckInequality(tokens);
-                return 4;
-            } else {
-                return 4;
-            }
-        }
-        for (Token t : tokens){
-            if (t.getTokenType() == TokenType.xor_bool_op
-                    || t.getTokenType() == TokenType.not_bool_op
-                    || t.getTokenType() == TokenType.and_bool_op
-                    || t.getTokenType() == TokenType.or_bool_op) {
-                isBool = true;
-            }
-            if (t.getTokenType() == TokenType.string_val){
-                concat = true;
-                if (isBool){
-                    System.out.println("Expression error: concatenation in boolean operation!");
-                    System.exit(1);
-                }
-            }
-            if (t.getTokenType() == TokenType.float_val){
-                floats = true;
-                if (isBool){
-                    System.out.println("Expression error: math in boolean operation!");
-                    System.exit(1);
-                }
-            }
-            if ((t.getTokenType() == TokenType.subtract
-                    || t.getTokenType() == TokenType.multiply
-                    || t.getTokenType() == TokenType.divide)){
-                if (isBool){
-                    System.out.println("Expression error: math in boolean operation!");
-                    System.exit(1);
-                }
-                if (concat){
-                    System.out.println("Expression error: Cannot concatenate string with math operators!");
-                    System.exit(1);
-                }
-            }
-            if (t.getTokenType() == TokenType.add){
-                if (isBool){
-                    System.out.println("Expression error: concatenation or math in boolean!");
-                    System.exit(1);
-                }
-            }
-        }
-        if (isBool){
-            return 3;
-        }
-        if (concat){
-            return 2;
-        } else {
-            if (floats) return 1;
-            else return 0;
         }
     }
 

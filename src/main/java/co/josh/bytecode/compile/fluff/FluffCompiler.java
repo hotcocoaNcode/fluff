@@ -142,7 +142,7 @@ public class FluffCompiler {
                         Tokenizer tokenizer = new v2Tokenizer();
                         tokens.addAll(i+1, tokenizer.tokenize(s.toString(), fileName));
                     } catch (Exception e){
-                        throw new RuntimeException(e.toString());
+                        JoshLogger.error(e.toString());
                     }
                 }
 
