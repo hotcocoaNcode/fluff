@@ -1,4 +1,4 @@
-include "macros/printStr.fm"
+include "macros/print.fm"
 
 int16 hw = 0;
 csalloc 2048 hw;

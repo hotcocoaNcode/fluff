@@ -40,7 +40,7 @@ public class FluffCompiler {
             //Variable management
             bytecodeMap.put(Instruction.setByteConstAddress, (byte) 1); //set memory byte from const <short>
             bytecodeMap.put(Instruction.copyFromAtPointer, (byte) 2); //set memory byte from word pointer <short>
-            bytecodeMap.put(Instruction.setWordConstAddress, (byte) 3); //set memory word <short>
+            bytecodeMap.put(Instruction.setWordConstAddress, (byte) 3); //set memory word from const <short>
             bytecodeMap.put(Instruction.copyFromGetPointer, (byte) 4); //honestly i forgor
             bytecodeMap.put(Instruction.constantCopyToAtPointer, (byte) 5); //honestly i forgor
             //bytecodeMap.put(Instruction.free, (byte) 6); //free variable
@@ -54,6 +54,7 @@ public class FluffCompiler {
 
             bytecodeMap.put(Instruction.lshift, (byte) 15); //left bit shift on stack
             bytecodeMap.put(Instruction.rshift, (byte) 16); //right bit shift on stack
+            bytecodeMap.put(Instruction.xor, (byte) 23); //bit xor on stack
 
             bytecodeMap.put(Instruction.greater, (byte) 17); //greaterThan on stack
             bytecodeMap.put(Instruction.equals, (byte) 18); //equals on stack
@@ -62,10 +63,9 @@ public class FluffCompiler {
             bytecodeMap.put(Instruction.greater_equals, (byte) 26); //greater_equals on stack
             bytecodeMap.put(Instruction.lesser_equals, (byte) 27); //lesser_equals on stack
 
-            bytecodeMap.put(Instruction.not, (byte) 20); //bit not on stack
-            bytecodeMap.put(Instruction.or, (byte) 22); //bit or on stack
-            bytecodeMap.put(Instruction.xor, (byte) 23); //bit xor on stack
-            bytecodeMap.put(Instruction.and, (byte) 24); //bit and on stack
+            bytecodeMap.put(Instruction.not, (byte) 20); //bool not on stack
+            bytecodeMap.put(Instruction.or, (byte) 22); //bool or on stack
+            bytecodeMap.put(Instruction.and, (byte) 24); //bool and on stack
             //Jumps
             bytecodeMap.put(Instruction.conditionalJumpRelative, (byte) 30); //Jump relatively if (stack pop == 1)
             bytecodeMap.put(Instruction.conditionalJumpExact, (byte) 31); //Jump exactly if (stack pop == 1)
