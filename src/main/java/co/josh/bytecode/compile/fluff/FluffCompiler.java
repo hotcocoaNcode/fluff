@@ -1,6 +1,7 @@
 package co.josh.bytecode.compile.fluff;
 
 import co.josh.JoshLogger;
+import co.josh.VersionInfo;
 import co.josh.bytecode.Instruction;
 import co.josh.bytecode.compile.cex.CompilerExtension;
 import co.josh.processors.expression.eval.RPN;
@@ -15,26 +16,52 @@ import java.util.*;
 
 public class FluffCompiler {
 
-    public ArrayList<Byte> header = new ArrayList<>();
+    public final ArrayList<Byte> header = new ArrayList<>();
 
-    public HashMap<Instruction, Byte> bytecodeMap = new HashMap<>();
+    public final HashMap<Instruction, Byte> bytecodeMap = new HashMap<>();
 
-    public HashMap<String, CompilerExtension> cexList = new HashMap();
+    public final HashMap<String, CompilerExtension> cexList = new HashMap<>();
 
-    public FluffCompiler(int compilerVersion, ArrayList<CompilerExtension> cexList){
-        String enabledCExesPrompt = "Enabled CExes: ";
+    public FluffCompiler(int bytecodeRevision, ArrayList<CompilerExtension> cexList){
+        JoshLogger.log("Fluff Mappings with bytecode revision " + bytecodeRevision + " instantiated.");
+        StringBuilder enabledCExesPrompt = new StringBuilder("Enabled CExes: ");
         int i = 0;
         for (CompilerExtension c : cexList){
             this.cexList.put(c.getStatement(), c);
-            enabledCExesPrompt = enabledCExesPrompt + c.getStatement();
+            enabledCExesPrompt.append(c.getStatement());
             if (i != cexList.size()-1){
-                enabledCExesPrompt = enabledCExesPrompt + ", ";
+                enabledCExesPrompt.append(", ");
             }
             i++;
         }
-        if (enabledCExesPrompt.equals("Enabled CExes: ")) enabledCExesPrompt = "No enabled CExes";
-        JoshLogger.log(enabledCExesPrompt);
-        if (compilerVersion == 0){
+        if (enabledCExesPrompt.toString().equals("Enabled CExes: ")) enabledCExesPrompt = new StringBuilder("No enabled CExes");
+        JoshLogger.log(enabledCExesPrompt.toString());
+
+        //Set up file header
+        //Magic Number FLOOFI (F100F1)
+        header.add((byte) -15); //  F1
+        header.add((byte) 0);   //  00
+        header.add((byte) -15); //  F1
+        header.add((byte) 0);   //Header Length temp
+        header.add((byte) VersionInfo.major);
+        header.add((byte) VersionInfo.minor);
+        header.add((byte) VersionInfo.revision);
+        header.add((byte) bytecodeRevision); //Instruction set version
+
+        ArrayList<String> headerAdds = new ArrayList<>();
+        headerAdds.add("cat_cafe"); // javafluff signature
+        //TODO: Allow CExes to add header info
+        for (String s : headerAdds){
+            for (char c : s.toCharArray()){
+                header.add((byte) c);
+            }
+            header.add((byte) '_');
+        }
+        header.remove(header.size()-1);
+
+
+        header.set(3, (byte) header.size());
+        if (bytecodeRevision == 1){
             //Exit
             bytecodeMap.put(Instruction.exit, (byte) 0); //exit <byte>
             //Variable management
@@ -88,42 +115,18 @@ public class FluffCompiler {
             // The string it parses terminates with \0 and the interpreter will quit if it is not supported
             bytecodeMap.put(Instruction.invokeInterpreterMode, (byte) 60);
             compileTimeMemory = new MemorySpace(16128);
-
-            //Set up file header
-            //Signature of FLOOFI (F100F1)
-            header.add((byte) -15); //F1
-            header.add((byte) 0); //  00
-            header.add((byte) -15); //F1
-            header.add((byte) 0); //Header Length
-            header.add((byte) 0); //Version Major
-            header.add((byte) 5); //Version Minor
-            header.add((byte) 1); //Revision
-            header.add((byte) 1); //Instruction set version
-
-            ArrayList<String> headerAdds = new ArrayList<>();
-            headerAdds.add("cat_cafe");
-            for (String s : headerAdds){
-                for (char c : s.toCharArray()){
-                    header.add((byte) c);
-                }
-                header.add((byte) '_');
-            }
-
-
-            header.set(3, (byte) header.size());
         } else {
-            JoshLogger.error("Bytecode revision " + compilerVersion + " does not exist!\n" +
+            JoshLogger.error("Bytecode revision " + bytecodeRevision + " does not exist!\n" +
                                         "Are you sure you have given the compiler the correct arguments?");
         }
     }
 
-    ArrayList<Byte> bytes = new ArrayList<>();
-    ArrayList<Byte> debugSymbols = new ArrayList<>();
+    final ArrayList<Byte> bytes = new ArrayList<>();
 
-    HashMap<String, MacroInfo> macros = new HashMap<>();
+    final HashMap<String, MacroInfo> macros = new HashMap<>();
     MemorySpace compileTimeMemory;
 
-    public byte[] compile(ArrayList<Token> tokens, boolean isMain){
+    public byte[] compile(ArrayList<Token> tokens){
         int scopeCounter = 0;
         Stack<Integer> loops = new Stack<>();
         Stack<Integer> ifStatements = new Stack<>();
@@ -169,6 +172,9 @@ public class FluffCompiler {
                     }
                     i--;
                     MacroInfo macro = new MacroInfo(macroTokens);
+                    if (macros.containsKey(macro.name)){
+                        JoshLogger.syntaxError("Cannot have duplicate macro names!", macro.tokens.get(0).getLine());
+                    }
                     macros.put(macro.name, macro);
                 }
 
@@ -440,10 +446,10 @@ public class FluffCompiler {
                         }
                         List<Token> macroTokens = macro.use();
                         //Scope the macro.
-                        for (int n = 0; n < macroTokens.size(); n++){
-                            if (macroTokens.get(n).getTokenType() == TokenType.name
-                            && nameMatch.containsKey(macroTokens.get(n).getValue().toString())){
-                                macroTokens.get(n).value = nameMatch.get(macroTokens.get(n).getValue().toString());
+                        for (Token macroToken : macroTokens) {
+                            if (macroToken.getTokenType() == TokenType.name
+                                    && nameMatch.containsKey(macroToken.getValue().toString())) {
+                                macroToken.value = nameMatch.get(macroToken.getValue().toString());
                             }
                         }
                         tokens.addAll(i+1, macroTokens);
@@ -568,7 +574,6 @@ public class FluffCompiler {
                             i++;
                             if (tokens.get(i).getTokenType() == TokenType.int_literal) {
                                 Short address = compileTimeMemory.mapAlloc(2);
-                                JoshLogger.log("New short (size 2) \"" + name + "\", storing at " + address);
                                 compileTimeMemory.addNew(name, "int16", address, scopeCounter, 2);
                                 Byte[] value = splitShort(address);
                                 bytes.add(value[0]);
@@ -589,7 +594,6 @@ public class FluffCompiler {
                                 i++;
                             }
                             Short address = compileTimeMemory.mapAlloc(2);
-                            JoshLogger.log("New short (size 2) \"" + name + "\", storing at " + address);
                             compileTimeMemory.addNew(name, "int16", address, scopeCounter, 2);
                             Byte[] value = splitShort(address);
                             bytes.add(value[0]);
@@ -624,7 +628,6 @@ public class FluffCompiler {
                             if (tokens.get(i).getTokenType() == TokenType.int_literal) {
                                 String sizeStr = tokens.get(i).getValue().toString();
                                 Short address = compileTimeMemory.mapAlloc(1);
-                                JoshLogger.log("New byte (size 1) \"" + name + "\", storing at " + address);
                                 compileTimeMemory.addNew(name, "int8", address, scopeCounter, 1);
                                 Byte[] value = splitShort(address);
                                 bytes.add(value[0]);
@@ -649,7 +652,6 @@ public class FluffCompiler {
                             {
                                 //Address and allocation
                                 Short address = compileTimeMemory.mapAlloc(1);
-                                JoshLogger.log("New byte (size 1) \"" + name + "\", storing at " + address);
                                 compileTimeMemory.addNew(name, "int8", address, scopeCounter, 1);
                                 Byte[] value = splitShort(address);
                                 bytes.add(value[0]);

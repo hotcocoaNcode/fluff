@@ -1,8 +1,8 @@
 include "macros/print.fm"
 
 int16 hw = 0;
-csalloc 15 hw;
-hw <- "Hello World!";
+csalloc 100 hw;
+hw <- "Hello World!\nEscape character test!";
 printString hw;
 
 exit 0;

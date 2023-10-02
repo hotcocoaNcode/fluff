@@ -6,20 +6,11 @@ import java.util.*;
 
 public class MemorySpace {
     private final int memLimit;
-    public HashMap<String, Short> memoryMap = new HashMap<>();
-    public HashMap<String, String> variableTypes = new HashMap<>();
-    public HashMap<String, Integer> variableScopes = new HashMap<>();
-    public HashMap<String, Integer> variableSizes = new HashMap<>();
-    public HashMap<String, String> pointerTypeMap = new HashMap<>();
-
-    public HashMap<Integer, Integer> blockIndices = new HashMap<>();
-
-    public void addNew(String name, String type, Short location, Integer scope, Integer size){
-        memoryMap.put(name, location);
-        variableTypes.put(name, type);
-        variableSizes.put(name, size);
-        variableScopes.put(name, scope);
-    }
+    public final HashMap<String, Short> memoryMap = new HashMap<>();
+    public final HashMap<String, String> variableTypes = new HashMap<>();
+    public final HashMap<String, Integer> variableScopes = new HashMap<>();
+    public final HashMap<String, Integer> variableSizes = new HashMap<>();
+    public final HashMap<String, String> pointerTypeMap = new HashMap<>();
 
     public Short mapAlloc(int size){
         short ret = 0;
@@ -29,7 +20,7 @@ public class MemorySpace {
         //the first variable in the file with anything larger than the ASCII value for "i".
 
         //Maybe it's just how java handles lists? No clue. At all.
-        List<String> names = memoryMap.keySet().stream().sorted(Comparator.comparingInt(string -> memoryMap.get(string))).toList();
+        List<String> names = memoryMap.keySet().stream().sorted(Comparator.comparingInt(memoryMap::get)).toList();
         for (int n = 0; n < names.size(); n++){
             //Get info of essentially memory.get(n)
             String s = names.get(n);
@@ -37,18 +28,6 @@ public class MemorySpace {
             Integer size1 = variableSizes.get(s);
             //Check every index that new object will be taking up for collision
             for (int i = 0; i < size; i++){
-                // check against every block index TODO: This is a dirty shitty fix. This could all be better.
-                for (Integer _int : blockIndices.keySet()){
-                    //  ret < start || ret >= end means outside of bounds
-                    if ((ret+i >= _int) && (ret+i < _int+blockIndices.get(_int))) {
-                        // Set return value to upper bound
-                        ret = (short) (_int+blockIndices.get(_int) - i);
-                        //Restart loop
-                        n = 0;
-                        //Break intersection check loop
-                        break;
-                    }
-                }
                 //  check against object
                 if ((ret+i >= c) && (ret+i < c+size1)) {
                     // Set return value to upper bound
@@ -72,7 +51,7 @@ public class MemorySpace {
 
 
     public void free(String name){
-        JoshLogger.log("Freeing \"" + name + "\" with size " + variableSizes.get(name));
+        JoshLogger.log("Freeing " + variableTypes.get(name) + " (size " + variableSizes.get(name) + ") \"" + name + "\", was stored at " + memoryMap.get(name));
         memoryMap.remove(name);
         variableSizes.remove(name);
         variableTypes.remove(name);
@@ -80,20 +59,26 @@ public class MemorySpace {
     }
 
 
-    Integer boc = 0; //Wrapper type for toString TODO what the fuck is this for?
+    Integer boc = 0; //Wrapper type for toString
+
+    public void addNew(String name, String type, Short location, Integer scope, Integer size){
+        JoshLogger.log("New " + type + " (size " + size.toString() + ") \""+name+"\", storing at " + location);
+        memoryMap.put(name, location);
+        variableTypes.put(name, type);
+        variableSizes.put(name, size);
+        variableScopes.put(name, scope);
+    }
+
     public void blockOff(int address, int size) {
-        memoryMap.put(boc.toString(), (short) address);
-        variableSizes.put(boc.toString(), size);
-        variableScopes.put(boc.toString(), -1);
-        variableTypes.put(boc.toString(), null);
-        boc++;
+        blockOffScoped(address, size, -1);
     }
 
     public void blockOffScoped(int address, int size, int scope) {
+        JoshLogger.log("Reserving " + size + " bytes of memory at address " + address + ((scope == -1) ? "" : " with scope " + scope));
         memoryMap.put(boc.toString(), (short) address);
         variableSizes.put(boc.toString(), size);
         variableScopes.put(boc.toString(), scope);
-        variableTypes.put(boc.toString(), null);
+        variableTypes.put("reserved_block", null);
         boc++;
     }
 }

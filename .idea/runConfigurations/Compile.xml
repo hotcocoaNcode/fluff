@@ -1,10 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Compile" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="17" />
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="co.josh.Main" />
     <module name="Fluff.main" />
-    <option name="PROGRAM_PARAMETERS" value="-Lverbose kagurabachi.ff" />
+    <option name="PROGRAM_PARAMETERS" value="-Lverbose test.ff" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/fluff" />
     <method v="2">
       <option name="Make" enabled="true" />

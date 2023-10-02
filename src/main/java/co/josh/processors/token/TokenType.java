@@ -2,12 +2,15 @@ package co.josh.processors.token;
 
 public enum TokenType {
     exit("exit"),
-    function_old("function_old"),
     name("name"),
+    @Deprecated
     println("println"),
+    @Deprecated
     print("print"),
     character_input("input"),
+    @Deprecated
     boolean_var("boolean_variable"),
+    @Deprecated
     boolean_val("boolean_value"),
     int_literal("integer_literal"),
     int16_variable("integer_variable"),
@@ -28,7 +31,9 @@ public enum TokenType {
     get_pointer("reference"),
     set_val_at_pointer("dereference_set"),
     get_val_at_pointer("dereference_get"),
+    @Deprecated
     float_val("float_value"),
+    @Deprecated
     float_var("float_variable"),
     opening_parentheses("("),
     closing_parentheses(")"),
@@ -52,11 +57,9 @@ public enum TokenType {
     _if("if"),
     loopback_if("loopback_if"),
     loop("loop_start"),
-    _while("unused_while_start"),
     bracket_open("["),
     bracket_close("]"),
     include_file("include"),
-    define_type("define_type"),
     macro_def("define_macro"),
     semi(";"),
     quick_assign("quick_assign"),
@@ -66,8 +69,6 @@ public enum TokenType {
     static_global_allocate("static_global_allocate"),
     inequality_not_equals("!="), inequality_greater_equals(">="), inequality_lesser_equals("<=");
 
-    public String s;
     TokenType(String s) {
-        this.s = s;
     }
 }

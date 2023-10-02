@@ -1,11 +1,11 @@
 package co.josh.processors.token;
 
 public class Token {
-    TokenType tokenType;
+    final TokenType tokenType;
 
     public Object value;
 
-    int line;
+    final int line;
 
     public Token(TokenType tokenType, Object value, int line) {
         this.tokenType = tokenType;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
-    HashMap<String, TokenType> keywords = new HashMap<>();
+    final HashMap<String, TokenType> keywords = new HashMap<>();
 
     public v2Tokenizer(){
         //Built in types
@@ -66,7 +66,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     buf = buf + s.charAt(i);
                     i++;
                     for (; i < s.length(); i++) {
-                        if (Character.isAlphabetic(s.charAt(i)) || Character.isDigit(s.charAt(i))) {
+                        if (Character.isLetterOrDigit(s.charAt(i)) || s.charAt(i) == '_') {
                             buf = buf + s.charAt(i);
                         } else {
                             break;
@@ -84,7 +84,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     }
                     buf = "";
                 }
-                //Hexadecimal Byte
+                //Hexadecimal
                 else if (s.charAt(i) == '0' && s.charAt(i+1) == 'x'){
                     buf = buf + s.charAt(i);
                     i+=3;
@@ -96,8 +96,8 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                         }
                     }
                     i--;
-                    // THREE COMMANDMENTS OF FLUFF BUILTIN DATA (not documented anywhere bc why not)
-                    // Hexadecimal will always assume the smallest data type
+                    // THREE COMMANDMENTS OF FLUFF LITERALS (only matters for storing to pointer locations)
+                    // Hexadecimal will always assume the smallest data type (if below 0xFF is byte)
                     // Decimal will always be short
                     // Chars will always be bytes
                     try {
@@ -205,9 +205,8 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 } else if (s.charAt(i) == '%'){
                     t.add(new Token(TokenType.modulo, null, line));
                 }
-                //Other random syntax things that may or may not be used (individually documented)
+                //Strings
                 else if (s.charAt(i) == '"') {
-                    //string
                     i++;
                     for (; i < s.length(); i++) {
                         if (s.charAt(i) != '"') {
@@ -218,17 +217,27 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     }
                     t.add(new Token(TokenType.string_val, buf.translateEscapes(), line));
                     buf = "";
-                } else if (s.charAt(i) == '\'') {
-                    //char val
+                }
+                //Char values
+                else if (s.charAt(i) == '\'') {
                     i++;
-                    if (s.charAt(i + 1) == '\'') {
-                        t.add(new Token(TokenType.int_literal, (byte)s.charAt(i), line));
+                    for (; i < s.length(); i++) {
+                        if (s.charAt(i) != '\'') {
+                            buf = buf + s.charAt(i);
+                        } else {
+                            break;
+                        }
+                    }
+                    buf = buf.translateEscapes();
+                    if (buf.length() == 1) {
+                        t.add(new Token(TokenType.int_literal, (byte)buf.charAt(0), line));
                     } else {
                         JoshLogger.syntaxError("Character can only be one char in length!", line);
                     }
-                    i++;
-                } else if (s.charAt(i) == ';') {
-                    //semicolon
+                    buf = "";
+                }
+                // Semi
+                else if (s.charAt(i) == ';') {
                     t.add(new Token(TokenType.semi, null, line));
                 }
             }

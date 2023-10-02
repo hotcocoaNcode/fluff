@@ -15,30 +15,42 @@ macro printString: int16 address {
 }
 
 macro printShort: int16 num { // In file macro test
+    int16 cloneNum = num;
+    if num < 0 {
+        cout '-';
+        cloneNum = cloneNum*-1;
+    }
+
     int16 lenpow10 .> 1;
     loop
         lenpow10 = lenpow10 * 10;
-    lif lenpow10 < num;
+    lif lenpow10 < cloneNum;
 
     if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
         loop
                 /*     number mod (l^10)  / (l^10)/10     + char convert*/
-            cout (num % (lenpow10)) / (lenpow10/10) + '0';
+            cout (cloneNum % (lenpow10)) / (lenpow10/10) + '0';
             lenpow10 = lenpow10 / 10;
         lif lenpow10 > 1;
     }
 }
 
 macro printByte: int8 num { // Multiple in file macros test
+    int8 cloneNum = num;
+    if num < 0 {
+        cout '-';
+        cloneNum = cloneNum * -1;
+    }
+
     int16 lenpow10 .> 1;
     loop
         lenpow10 = lenpow10 * 10;
-    lif lenpow10 < num;
+    lif lenpow10 < cloneNum;
 
     if lenpow10 > 1 { /* number is larger than 10, equivalent to while loop (handle 0 case) */
         loop
                 /*     number mod (l^10)  / (l^10)/10     + char convert*/
-            cout (num % (lenpow10)) / (lenpow10/10) + '0';
+            cout (cloneNum % (lenpow10)) / (lenpow10/10) + '0';
             lenpow10 = lenpow10 / 10;
         lif lenpow10 > 1;
     }

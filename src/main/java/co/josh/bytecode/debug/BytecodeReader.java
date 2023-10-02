@@ -111,9 +111,9 @@ public class BytecodeReader {
                 case invokeInterpreterMode -> {
                     System.out.print(JoshLogger.ANSI_RED + "invokeInterpreterMode "  + JoshLogger.ANSI_RESET);
                     i++;
-                    String mode = "";
+                    StringBuilder mode = new StringBuilder();
                     while (file[i] != 0){
-                        mode = mode + (char)file[i];
+                        mode.append((char) file[i]);
                         i++;
                     }
                     System.out.println(mode);

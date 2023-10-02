@@ -31,41 +31,23 @@ public class BrainfuckCompilerExtension implements CompilerExtension {
             String brainfuck = tokens.get(0).getValue().toString();
             for (int i = 0; i < brainfuck.length(); i++){
                 switch (brainfuck.charAt(i)){
-                    case '>' -> {
-                        bytes.add((byte) 0);
-                    }
+                    case '>' -> bytes.add((byte) 0);
 
-                    case '<' -> {
-                        bytes.add((byte) 1);
-                    }
+                    case '<' -> bytes.add((byte) 1);
 
-                    case '[' -> {
-                        bytes.add((byte) 2);
-                    }
+                    case '[' -> bytes.add((byte) 2);
 
-                    case ']' -> {
-                        bytes.add((byte) 3);
-                    }
+                    case ']' -> bytes.add((byte) 3);
 
-                    case '+' -> {
-                        bytes.add((byte) 4);
-                    }
+                    case '+' -> bytes.add((byte) 4);
 
-                    case '-' -> {
-                        bytes.add((byte) 5);
-                    }
+                    case '-' -> bytes.add((byte) 5);
 
-                    case '.' -> {
-                        bytes.add((byte) 6);
-                    }
+                    case '.' -> bytes.add((byte) 6);
 
-                    case ',' -> {
-                        bytes.add((byte) 7);
-                    }
+                    case ',' -> bytes.add((byte) 7);
 
-                    case '~' -> {
-                        bytes.add((byte) 8);
-                    }
+                    case '~' -> bytes.add((byte) 8);
                 }
             }
         } else JoshLogger.syntaxError("Brainfuck command must take in a string val!", tokens.get(0).getLine());
@@ -86,15 +68,9 @@ public class BrainfuckCompilerExtension implements CompilerExtension {
                 JoshLogger.error("Brainfuck pointer lower than 0!");
             }
             switch (bytecode[i]) {
-                case (0) -> {
-                    pointer++;
-                }
-                case (1) -> {
-                    pointer--;
-                }
-                case (2) -> {
-                    loops.push(i);
-                }
+                case (0) -> pointer++;
+                case (1) -> pointer--;
+                case (2) -> loops.push(i);
                 case (3) -> {
                     if (_ram[pointer] != 0){
                         i = loops.peek();
@@ -102,18 +78,10 @@ public class BrainfuckCompilerExtension implements CompilerExtension {
                         loops.pop();
                     }
                 }
-                case (4) -> {
-                    _ram[pointer]++;
-                }
-                case (5) -> {
-                    _ram[pointer]--;
-                }
-                case (6) -> {
-                    System.out.print((char)_ram[pointer]);
-                }
-                case (7) -> {
-                    _ram[pointer]=(byte)scanner.nextLine().charAt(0);
-                }
+                case (4) -> _ram[pointer]++;
+                case (5) -> _ram[pointer]--;
+                case (6) -> System.out.print((char)_ram[pointer]);
+                case (7) -> _ram[pointer]=(byte)scanner.nextLine().charAt(0);
                 case (8) -> {
                     return i;
                 }

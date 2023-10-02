@@ -1,5 +1,6 @@
 package co.josh.processors.expression.shuntingyard;
 
+import co.josh.JoshLogger;
 import co.josh.processors.token.Token;
 import co.josh.processors.token.TokenType;
 
@@ -52,6 +53,7 @@ public class CompilerShuntingYard {
                 || t.getTokenType() == TokenType.inequality_equals
                 || t.getTokenType() == TokenType.inequality_lesser
                 || t.getTokenType() == TokenType.inequality_greater
+                || t.getTokenType() == TokenType.inequality_not_equals
                 || t.getTokenType() == TokenType.and_bool_op
                 || t.getTokenType() == TokenType.or_bool_op
                 || t.getTokenType() == TokenType.xor_bool_op
@@ -65,23 +67,14 @@ public class CompilerShuntingYard {
         // Initially empty string taken
         ArrayList<Token> output = new ArrayList<>();
 
-        // Iterating over tokens using inbuilt
-        // .length() function
         for (Token t : expression) {
-            // Finding character at 'i'th index
-            // If the scanned Token is an
-            // operand, add it to output
+            //Add non-ops to output
             if (isNotOperator(t))
                 output.add(t);
-
-                // If the scanned Token is an '('
-                // push it to the stack
+            // If token is opening paren push it
             else if (t.getTokenType() == TokenType.opening_parentheses)
                 stack.push(t);
-
-                // If the scanned Token is an ')' pop and append
-                // it to output from the stack until an '(' is
-                // encountered
+            // If token is closing paren then pop from stack to output until the stack top is an opening paren
             else if (t.getTokenType() == TokenType.closing_parentheses) {
                 while (!stack.isEmpty()
                         && stack.peek().getTokenType() != TokenType.opening_parentheses)
@@ -89,14 +82,12 @@ public class CompilerShuntingYard {
 
                 stack.pop();
             }
-
-            // If an operator is encountered then taken the
-            // further action based on the precedence of the
-            // operator
-
+            //This means we hit an operator
             else {
-                while (
-                        !stack.isEmpty()
+                // While the stack isn't empty, and the precedence of the operator
+                // is larger than the top of the stack (and it has left associativity)
+                // pop from stack to output and then push the operator onto the stack
+                while (!stack.isEmpty()
                                 && getPrecedence(t)
                                 <= getPrecedence(stack.peek())
                                 && hasLeftAssociativity(t)) {
@@ -110,11 +101,10 @@ public class CompilerShuntingYard {
         }
 
         // pop all the remaining operators from
-        // the stack and append them to output
+        // the stack to the output
         while (!stack.isEmpty()) {
             if (stack.peek().getTokenType() == TokenType.opening_parentheses){
-                System.out.println("Expression is invalid!");
-                System.exit(1);
+                JoshLogger.syntaxError("Expression is not valid!", expression.get(0).getLine());
             }
             output.add(stack.pop());
         }

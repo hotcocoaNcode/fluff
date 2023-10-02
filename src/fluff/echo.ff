@@ -1,27 +1,18 @@
-byte in = ' ';
-short ptr = 0;
-cgalloc 100 ptr;
-short start = ptr;
-byte atptr = ' ';
+include "macros/print.fm"
+
+int8 in = ' ';
+int16 start = 0;
+cgalloc 102 start;
+int16 ptr = start;
 loop {
     cin in;
     ptr <- in;
     ptr = ptr + 1;
-} lif (in != '\') && (ptr < start+100);
-/*terminate string*/
-ptr = ptr - 1;
-in = 0;
-ptr <- in;
+    /* not past 100        and  input was not newline */
+} lif (ptr < (start + 100)) && (in != '\n');
+ptr <- 0x00;
 free in;
-/*reset pointer*/
-ptr = start;
-loop {
-   /*print out string*/
-   byte a .> 0;
-   ptr -> a;
-   cout a;
-   ptr = ptr + 1;
-   ptr -> atptr;
-} lif (atptr != 0);
+free ptr;
+printString start;
 
 exit 0;

@@ -7,13 +7,13 @@ import co.josh.processors.token.TokenType;
 import java.util.ArrayList;
 
 public class MacroInfo {
-    ArrayList<Token> tokens;
+    final ArrayList<Token> tokens;
 
-    String name;
+    final String name;
 
-    ArrayList<String> argTypes = new ArrayList<>();
+    final ArrayList<String> argTypes = new ArrayList<>();
 
-    ArrayList<String> argNames = new ArrayList<>();
+    final ArrayList<String> argNames = new ArrayList<>();
 
     public MacroInfo(ArrayList<Token> tokens) {
         this.tokens = tokens;
