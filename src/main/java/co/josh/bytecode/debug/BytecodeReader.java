@@ -4,9 +4,9 @@ import co.josh.JoshLogger;
 import co.josh.bytecode.Instruction;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Scanner;
 
-//Probably will implement this at some point, but just storing reverse of compiler methods for now.
 public class BytecodeReader {
     public static void read(byte[] file, HashMap<Instruction, Byte> bytecodeMap){
         JoshLogger.importantPurple("Raw bytes (" + JoshLogger.ANSI_CYAN + "blue" + JoshLogger.ANSI_PURPLE + " is likely header): ");
@@ -16,8 +16,8 @@ public class BytecodeReader {
             } else {
                 System.out.print(JoshLogger.ANSI_RESET);
             }
-            if (i != file.length-1) System.out.printf("0x%x, ", file[i]);
-            else System.out.printf("0x%x", file[i]);
+            if (i != file.length-1) System.out.printf("0x%x, ", ((int)file[i])&0xFF);
+            else System.out.printf("0x%x", ((int)file[i])&0xFF);
             if ((i+1) % 15 == 0) System.out.print('\n'); //newline every 15 bytes
         }
         System.out.print("\n");
@@ -96,7 +96,7 @@ public class BytecodeReader {
         for (int i = file[3]; i < file.length; i++){
             Instruction inst = reversed.get(file[i]);
             //Non null check
-            if (inst == null) JoshLogger.error("Instruction was null. Most likely a reading error has occurred.");
+            if (Objects.isNull(inst)) JoshLogger.error("Instruction was null. Most likely a reading error has occurred.");
             //Print number
             if (isJumpByteFlag[i] == 0) System.out.print(JoshLogger.ANSI_BLUE + i + JoshLogger.ANSI_RESET + ": ");
             //Is jump flagged?

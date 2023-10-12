@@ -76,9 +76,9 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     if (keywords.containsKey(buf)) {
                         t.add(new Token(keywords.get(buf), null, line));
                     } else if (buf.equals("true")) {
-                        t.add(new Token(TokenType.int_literal, 1, line));
+                        t.add(new Token(TokenType.int_literal, (short) 1, line));
                     } else if (buf.equals("false")) {
-                        t.add(new Token(TokenType.int_literal, 0, line));
+                        t.add(new Token(TokenType.int_literal, (short) 0, line));
                     } else {
                         t.add(new Token(TokenType.name, buf, line));
                     }
@@ -97,7 +97,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     }
                     i--;
                     // THREE COMMANDMENTS OF FLUFF LITERALS (only matters for storing to pointer locations)
-                    // Hexadecimal will always assume the smallest data type (if below 0xFF is byte)
+                    // Hexadecimal will always assume the smallest data type (if below 0xFF it's a byte)
                     // Decimal will always be short
                     // Chars will always be bytes
                     try {
@@ -230,7 +230,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                     }
                     buf = buf.translateEscapes();
                     if (buf.length() == 1) {
-                        t.add(new Token(TokenType.int_literal, (byte)buf.charAt(0), line));
+                        t.add(new Token(TokenType.int_literal, (byte) buf.charAt(0), line));
                     } else {
                         JoshLogger.syntaxError("Character can only be one char in length!", line);
                     }

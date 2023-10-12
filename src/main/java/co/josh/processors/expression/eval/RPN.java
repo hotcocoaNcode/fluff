@@ -5,7 +5,6 @@ import co.josh.bytecode.compile.fluff.FluffCompiler;
 import co.josh.bytecode.Instruction;
 import co.josh.bytecode.compile.fluff.MemorySpace;
 import co.josh.processors.token.Token;
-import co.josh.processors.token.TokenType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,30 +16,16 @@ public class RPN {
                                                MemorySpace memorySpace) {
         ArrayList<Byte> bytes = new ArrayList<>();
         short stackSize = 0;
-        boolean encounteredVariable = false;
-        for (int i = 0; i < tokens.size(); i++){
-            if (stackSize > 255){
-                JoshLogger.error("RPN Stack Overflow!");
+        ExpOpt.optimize(tokens);
+        for (Token token : tokens) {
+            if (stackSize > 255) {
+                JoshLogger.error("RPN Stack Overflow! Please split the expression into multiple parts.");
             } else if (stackSize < 0) {
-                JoshLogger.error("RPN Stack at negative size!");
+                JoshLogger.error("RPN Stack at negative size! Something has gone seriously wrong.");
             }
-            switch (tokens.get(i).getTokenType()) {
+            switch (token.getTokenType()) {
                 case add -> {
-                    if (encounteredVariable){
-                        bytes.add(instructions.get(Instruction.add));
-                    } else {
-                        int line = tokens.get(0).getLine();
-                        int a = (short) tokens.remove(0).getValue();
-                        int b = (short) tokens.remove(0).getValue();
-                        tokens.remove(0); //Pop operator
-                        for (int iter = 0; iter < 6; iter++){
-                            bytes.remove(bytes.size()-1); //Remove last 6 bytes of output (stack_push_16 low,high)
-                        }
-                        tokens.add(0, new Token(TokenType.int_literal, a+b, line));
-                        i = -1; // Reset i to 0 on next iteration. i++ after continue so this ensures i will be 0
-                        stackSize = 0;
-                        continue;
-                    }
+                    bytes.add(instructions.get(Instruction.add));
                     stackSize--;
                 }
                 case subtract -> {
@@ -109,32 +94,32 @@ public class RPN {
                 case int_literal -> {
                     stackSize++;
                     bytes.add(instructions.get(Instruction.pushConst16bit));
-                    Byte[] splitted = FluffCompiler.splitShort(Short.parseShort(tokens.get(i).getValue().toString()));
+                    Byte[] splitted = FluffCompiler.splitShort(Short.parseShort(token.getValue().toString()));
                     bytes.add(splitted[0]);
                     bytes.add(splitted[1]);
                 }
                 case name -> {
-                    encounteredVariable = true;
                     stackSize++;
-                    String name = tokens.get(i).getValue().toString();
+                    String name = token.getValue().toString();
                     if (memorySpace.variableSizes.containsKey(name)) {
                         if (memorySpace.variableTypes.get(name).equals("int16")) {
                             bytes.add(instructions.get(Instruction.push16bit));
                         } else if (memorySpace.variableTypes.get(name).equals("int8")) {
                             bytes.add(instructions.get(Instruction.pushByteAs16));
                         } else {
-                            JoshLogger.importantPurple("Achievement Get: How Did We Get Here?");
-                            JoshLogger.importantGreen("The compiler is on crack right now. Please report this.");
-                            JoshLogger.error("Somehow there's a non integer type...? (" + memorySpace.variableTypes.get(name) + ")");
+                            JoshLogger.error("Non integer type (" + memorySpace.variableTypes.get(name) + ") in expression.");
                         }
                         Byte[] splitted = FluffCompiler.splitShort(memorySpace.memoryMap.get(name));
                         bytes.add(splitted[0]);
                         bytes.add(splitted[1]);
                     } else {
-                        JoshLogger.syntaxError("Variable \"" + name + "\" does not exist!", tokens.get(i).getLine());
+                        JoshLogger.syntaxError("Variable \"" + name + "\" does not exist!", token.getLine());
                     }
                 }
             }
+        }
+        if (stackSize > 1) {
+            JoshLogger.error("Operation stack has more than one value left.");
         }
         return bytes;
     }
