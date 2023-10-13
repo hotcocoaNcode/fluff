@@ -67,7 +67,13 @@ public enum TokenType {
     static_scoped_allocate("static_scoped_allocate"),
     character_out("cout"),
     static_global_allocate("static_global_allocate"),
-    inequality_not_equals("!="), inequality_greater_equals(">="), inequality_lesser_equals("<=");
+    inequality_not_equals("!="),
+    inequality_greater_equals(">="),
+    inequality_lesser_equals("<="),
+    _switch("switch"),
+    _case("case"),
+    _default("default"),
+    _define("define");
 
     TokenType(String s) {
     }

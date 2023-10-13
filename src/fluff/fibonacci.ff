@@ -20,15 +20,15 @@ loop {
     //Print it out with macro
     printString strAddress;
     printByte i;
-    newLine;
+    cout newLine;
 
     //Same thing here with "n: "
     strAddress <- "n: ";
     printString strAddress;
     printShort current;
-    newLine;
+    cout newLine;
 
     //Separate the lines so it doesn't look all mushed together
-    newLine;
+    cout newLine;
 } lif i < 20;
 exit 0;

@@ -1,8 +1,8 @@
-include "macros/print.fm"
+include "macros/print.fm" //Insert the code in print.fm right here in the file
 
-int16 hw = 0;
-csalloc 100 hw;
-hw <- "Hello World!\nEscape character test!";
-printString hw;
+int16 hw = 0; //Create pointer
+csalloc 100 hw; //Allocate 100 bytes and store location of those bytes to hw
+hw <- "Hello World!"; //Put string Hello World!\0 to hw
+printString hw; //Use the print macro to print out the bytes at hw
 
-exit 0;
+exit 0; //Return an exit code of zero (meaning the program succeeded)

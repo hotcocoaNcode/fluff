@@ -4,15 +4,19 @@ int8 in = ' ';
 int16 start = 0;
 cgalloc 102 start;
 int16 ptr = start;
-loop {
-    cin in;
-    ptr <- in;
-    ptr = ptr + 1;
+
+loop
+    cin in; // Get input
+    ptr <- in; // Store input byte at pointer
+    ptr = ptr + 1; // Increment pointer to free memory
+
     /* not past 100        and  input was not newline */
-} lif (ptr < (start + 100)) && (in != '\n');
-ptr <- 0x00;
+lif (ptr < (start + 100)) && (in != '\n');
+
+ptr <- 0x00; // store \0 escape character at string end
 free in;
 free ptr;
+
 printString start;
 
 exit 0;

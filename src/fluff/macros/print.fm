@@ -1,6 +1,4 @@
-macro newLine {
-    cout 10;
-}
+def newLine '\n'
 
 macro printString: int16 address {
     int16 iter = address;

@@ -61,7 +61,8 @@ public class FluffCompiler {
 
 
         header.set(3, (byte) header.size());
-        if (bytecodeRevision == 1){
+
+        if (bytecodeRevision == 1) {
             //Exit
             bytecodeMap.put(Instruction.exit, (byte) 0); //exit <byte>
             //Variable management
@@ -124,6 +125,7 @@ public class FluffCompiler {
     final ArrayList<Byte> bytes = new ArrayList<>();
 
     final HashMap<String, MacroInfo> macros = new HashMap<>();
+
     MemorySpace compileTimeMemory;
 
     public byte[] compile(ArrayList<Token> tokens){
@@ -146,6 +148,20 @@ public class FluffCompiler {
                         tokens.addAll(i+1, tokenizer.tokenize(s.toString(), fileName));
                     } catch (Exception e){
                         JoshLogger.error(e.toString());
+                    }
+                }
+
+                case _define -> {
+                    i++;
+                    if (tokens.get(i).getTokenType() != TokenType.name) JoshLogger.syntaxError("def must be followed by name!", tokens.get(i).getLine());
+                    String name = tokens.get(i).getValue().toString();
+                    i++;
+                    Token replaceWith = tokens.get(i);
+                    for (int n = i; n < tokens.size(); n++) {
+                        if (tokens.get(n).getTokenType() == TokenType.name
+                                && tokens.get(n).getValue().toString().equals(name)) {
+                            tokens.set(n, replaceWith);
+                        }
                     }
                 }
 

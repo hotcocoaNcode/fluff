@@ -1,3 +1,6 @@
+/* This was an old testing thing for fluff v1,
+which was never intended for embedded systems and
+was actually meant to make things easier for programmers */
 println "Hello World!";
 /* println "Comment should not execute"; */
 string a = "";

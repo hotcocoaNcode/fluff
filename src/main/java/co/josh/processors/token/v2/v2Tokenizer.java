@@ -29,7 +29,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
         keywords.put("loop", TokenType.loop);
         //Definitions
         keywords.put("macro", TokenType.macro_def);
-        //keywords.put("newtype", TokenType.define_type); //TODO custom types
+        keywords.put("def", TokenType._define);
     }
 
     @Override
@@ -61,6 +61,7 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 continue;
             }
             if (!multiLineComment && !singleLineComment) {
+                //TODO: This should really be a switch statement.
                 //Keywords
                 if (Character.isAlphabetic(s.charAt(i))) {
                     buf = buf + s.charAt(i);

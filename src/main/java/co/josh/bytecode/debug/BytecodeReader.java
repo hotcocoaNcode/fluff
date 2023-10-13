@@ -297,7 +297,7 @@ public class BytecodeReader {
                 }
 
                 case conditionalNotJumpExact -> {
-                    System.out.print(JoshLogger.ANSI_GREEN + "conditionalNotJumpExact " + JoshLogger.ANSI_RESET + "to byte ");
+                    System.out.print(JoshLogger.ANSI_GREEN + "conditionalNotJumpExact " + JoshLogger.ANSI_RESET + "to byte "  + JoshLogger.ANSI_CYAN);
                     i++;
                     int lo = file[i];
                     i++;
