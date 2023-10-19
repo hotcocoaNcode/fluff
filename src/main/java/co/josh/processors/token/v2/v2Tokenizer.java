@@ -61,7 +61,6 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                 continue;
             }
             if (!multiLineComment && !singleLineComment) {
-                //TODO: This should really be a switch statement.
                 //Keywords
                 if (Character.isAlphabetic(s.charAt(i))) {
                     buf = buf + s.charAt(i);
@@ -97,6 +96,9 @@ public class v2Tokenizer implements co.josh.processors.token.Tokenizer {
                         }
                     }
                     i--;
+
+                    //TODO do these apply anymore? ExpOpt just casts everything to a short eventually...
+
                     // THREE COMMANDMENTS OF FLUFF LITERALS (only matters for storing to pointer locations)
                     // Hexadecimal will always assume the smallest data type (if below 0xFF it's a byte)
                     // Decimal will always be short

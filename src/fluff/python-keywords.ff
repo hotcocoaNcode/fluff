@@ -1,0 +1,11 @@
+def or ||
+def and &&
+def True true
+def False false
+
+cout (False or False) + '0';
+cout (True or False) + '0';
+cout (True and False) + '0';
+cout (True and True) + '0';
+
+exit 0;

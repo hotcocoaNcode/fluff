@@ -2,7 +2,7 @@
   <configuration default="false" name="Compile" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="co.josh.Main" />
     <module name="Fluff.main" />
-    <option name="PROGRAM_PARAMETERS" value="-Lverbose test.ff" />
+    <option name="PROGRAM_PARAMETERS" value="-Lverbose helloworld.ff" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/fluff" />
     <method v="2">
       <option name="Make" enabled="true" />

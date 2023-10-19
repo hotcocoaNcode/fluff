@@ -2,7 +2,7 @@ include "macros/print.fm" //Insert the code in print.fm right here in the file
 
 int16 hw = 0; //Create pointer
 csalloc 100 hw; //Allocate 100 bytes and store location of those bytes to hw
-hw <- "Hello World!"; //Put string Hello World!\0 to hw
-printString hw; //Use the print macro to print out the bytes at hw
+hw <- "Hello World!\n"; //Put string Hello World!\n\0 to hw (All strings are null terminated)
+printString hw; //Use the printString macro defined in print.fm to print out the bytes at hw until it runs into a 0
 
-exit 0; //Return an exit code of zero (meaning the program succeeded)
+exit 0; //Return an exit code of zero (meaning the program succeeded). This is required for any terminal applications.

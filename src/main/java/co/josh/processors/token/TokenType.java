@@ -70,9 +70,6 @@ public enum TokenType {
     inequality_not_equals("!="),
     inequality_greater_equals(">="),
     inequality_lesser_equals("<="),
-    _switch("switch"),
-    _case("case"),
-    _default("default"),
     _define("define");
 
     TokenType(String s) {
